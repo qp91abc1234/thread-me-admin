@@ -24,3 +24,100 @@ export interface RouteConfig {
 
 // 路由配置列表
 export type RouteConfigList = RouteConfig[]
+
+// ========== RBAC 相关类型定义 ==========
+
+// API权限项
+export interface ApiPermission {
+  code: string // 全局唯一，如 'GET:/api/user/list'
+  name: string // API名称，如 '获取用户列表'
+  method: string // HTTP方法，如 'GET', 'POST'
+}
+
+// API权限列表
+export type ApiPermissionList = ApiPermission[]
+
+// 用户信息
+export interface User {
+  id: number
+  username: string
+  realName: string
+  email: string
+  phone: string
+  roleIds: number[] // 角色ID数组（多对多）
+  status: number // 0-禁用，1-启用
+  createTime: string
+  updateTime?: string
+}
+
+// 用户列表查询参数
+export interface UserQueryParams {
+  username?: string
+  status?: number
+  currentPage: number
+  pageSize: number
+}
+
+// 用户列表响应
+export interface UserListResponse {
+  list: User[]
+  total: number
+}
+
+// 角色信息
+export interface Role {
+  id: number
+  code: string // 角色编码，如 'admin', 'user'
+  name: string // 角色名称
+  description?: string
+  status: number // 0-禁用，1-启用
+  createTime: string
+  updateTime?: string
+}
+
+// 角色列表查询参数
+export interface RoleQueryParams {
+  code?: string
+  name?: string
+  status?: number
+  currentPage: number
+  pageSize: number
+}
+
+// 角色列表响应
+export interface RoleListResponse {
+  list: Role[]
+  total: number
+}
+
+// 角色权限信息（用于权限配置）
+export interface RolePermission {
+  menuIds: number[] // 菜单ID数组
+  buttonPermissionCodes: string[] // 按钮权限code数组
+  apiPermissionCodes: string[] // API权限code数组
+}
+
+// 菜单项（基于RouteConfig扩展）
+export interface MenuItem extends RouteConfig {
+  id: number
+  parentId?: number // 父菜单ID，根菜单为undefined
+  sort: number // 排序值
+  status: number // 0-禁用，1-启用
+  buttonPermissionCodes: string[] // 关联的按钮权限code数组
+  apiPermissionCodes: string[] // 关联的API权限code数组
+  createTime?: string
+  updateTime?: string
+  children?: MenuItem[] // 子菜单
+}
+
+// 菜单树响应
+export interface MenuTreeResponse {
+  tree: MenuItem[]
+}
+
+// 菜单排序参数
+export interface MenuSortParams {
+  id: number
+  parentId?: number
+  sort: number
+}

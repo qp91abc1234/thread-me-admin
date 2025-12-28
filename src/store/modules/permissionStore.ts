@@ -9,7 +9,7 @@ import type {
 } from '@/common/types/permission'
 
 // 视图组件模块映射（用于动态导入）
-const viewComponentModules = import.meta.glob('@/views/*/*.vue')
+const viewComponentModules = import.meta.glob('@/views/**/*.vue')
 
 const ERROR_ROUTE = {
   path: ':pathMatch(.*)*',
@@ -27,14 +27,24 @@ const ROUTE_CONFIG: RouteConfigList = [
     icon: 'Sunny'
   },
   {
-    path: 'system',
-    title: '系统管理',
-    icon: 'Setting',
+    path: 'rbac',
+    title: '权限管理',
+    icon: 'Lock',
     children: [
       {
         path: 'user',
         title: '用户管理',
         compPath: '/src/views/user/user.vue'
+      },
+      {
+        path: 'role',
+        title: '角色管理',
+        compPath: '/src/views/role/role.vue'
+      },
+      {
+        path: 'menu',
+        title: '菜单管理',
+        compPath: '/src/views/menu/menu.vue'
       }
     ]
   },

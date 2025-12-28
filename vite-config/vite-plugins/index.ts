@@ -10,6 +10,7 @@ import dayjs from 'dayjs'
 import ViteHtmlTransform from './viteHtmlTransform'
 import viteImgCompress from './viteImgCompress'
 import viteImgUpload from './viteImgUpload'
+import { setupMockPlugin } from './viteMock'
 
 import type { PluginOption } from 'vite'
 
@@ -21,7 +22,7 @@ import type { PluginOption } from 'vite'
 export function getPlugins(viteEnv: Env.ImportMeta, isBuild: boolean): PluginOption[] {
   const buildTime = dayjs().format('YYYY-MM-DD HH:mm:ss')
 
-  let plugins: PluginOption[] = [
+  const plugins: PluginOption[] = [
     vue(),
     AutoImport({
       resolvers: [ElementPlusResolver()]
@@ -59,13 +60,17 @@ export function getPlugins(viteEnv: Env.ImportMeta, isBuild: boolean): PluginOpt
 
   const isTrue = (value: string) => value === 'true'
 
-  // 开发环境：按需启用 Vue DevTools
-  if (!isBuild && isTrue(viteEnv.VITE_DEV_TOOL)) {
-    plugins = plugins.concat(
-      vueDevTools({
-        launchEditor: 'cursor'
-      })
-    )
+  // 开发环境
+  if (!isBuild) {
+    if (isTrue(viteEnv.VITE_DEV_TOOL)) {
+      plugins.push(
+        vueDevTools({
+          launchEditor: 'cursor'
+        })
+      )
+    }
+
+    plugins.push(setupMockPlugin(isBuild))
   }
 
   if (isBuild) {
@@ -93,7 +98,7 @@ export function getPlugins(viteEnv: Env.ImportMeta, isBuild: boolean): PluginOpt
 
     // 按需启用打包体积分析
     if (isTrue(viteEnv.VITE_VISUALIZER_TOOL)) {
-      plugins = plugins.concat(
+      plugins.push(
         visualizer({
           emitFile: true,
           filename: 'stat.html',

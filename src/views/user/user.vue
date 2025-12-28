@@ -1,19 +1,11 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
 import { Delete, Edit, Plus, Refresh, Search } from '@element-plus/icons-vue'
-import { formatDateTime } from '@/common/utils'
-
-interface User {
-  id: number
-  username: string
-  realName: string
-  email: string
-  phone: string
-  role: string
-  status: number
-  createTime: string
-}
+import { getUserList, createUser, updateUser, deleteUser } from '@/common/api/user'
+import { getRoleList } from '@/common/api/role'
+import type { User, UserQueryParams } from '@/common/types/permission'
+import type { Role } from '@/common/types/permission'
 
 const loading = ref(false)
 const dialogVisible = ref(false)
@@ -21,73 +13,79 @@ const dialogTitle = ref('新增用户')
 const userFormRef = ref<FormInstance>()
 
 // 搜索表单
-const searchForm = reactive({
+const searchForm = reactive<UserQueryParams>({
   username: '',
-  status: ''
+  status: undefined,
+  currentPage: 1,
+  pageSize: 10
 })
 
 // 用户表单
-const userForm = reactive({
+const userForm = reactive<Partial<User> & { password: string }>({
   id: 0,
   username: '',
   realName: '',
   email: '',
   phone: '',
-  role: 'user',
+  roleIds: [],
   status: 1,
   password: ''
 })
 
 // 表格数据
-const tableData = ref<User[]>([
-  {
-    id: 1,
-    username: 'admin',
-    realName: '管理员',
-    email: 'admin@example.com',
-    phone: '13800138000',
-    role: 'admin',
-    status: 1,
-    createTime: '2024-01-01 10:00:00'
-  },
-  {
-    id: 2,
-    username: 'user001',
-    realName: '张三',
-    email: 'zhangsan@example.com',
-    phone: '13800138001',
-    role: 'user',
-    status: 1,
-    createTime: '2024-01-02 10:00:00'
-  },
-  {
-    id: 3,
-    username: 'user002',
-    realName: '李四',
-    email: 'lisi@example.com',
-    phone: '13800138002',
-    role: 'user',
-    status: 0,
-    createTime: '2024-01-03 10:00:00'
-  }
-])
-
+const tableData = ref<User[]>([])
 const pagination = reactive({
   currentPage: 1,
   pageSize: 10,
-  total: 3
+  total: 0
 })
+
+// 角色列表（用于下拉选择）
+const roleOptions = ref<Role[]>([])
+
+// 加载角色列表
+const loadRoleOptions = async () => {
+  try {
+    const res = await getRoleList({
+      currentPage: 1,
+      pageSize: 1000
+    })
+    roleOptions.value = res.list
+  } catch (error) {
+    console.error('加载角色列表失败:', error)
+  }
+}
+
+// 加载用户列表
+const loadUserList = async () => {
+  loading.value = true
+  try {
+    const params: UserQueryParams = {
+      username: searchForm.username || undefined,
+      status: searchForm.status,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize
+    }
+    const res = await getUserList(params)
+    tableData.value = res.list
+    pagination.total = res.total
+  } catch (error: any) {
+    ElMessage.error(error.message || '加载用户列表失败')
+  } finally {
+    loading.value = false
+  }
+}
 
 // 搜索
 const handleSearch = () => {
-  console.log('搜索:', searchForm)
-  // 这里实现搜索逻辑
+  pagination.currentPage = 1
+  loadUserList()
 }
 
 // 重置搜索
 const handleReset = () => {
   searchForm.username = ''
-  searchForm.status = ''
+  searchForm.status = undefined
   handleSearch()
 }
 
@@ -102,50 +100,55 @@ const handleAdd = () => {
 const handleEdit = (row: User) => {
   dialogTitle.value = '编辑用户'
   dialogVisible.value = true
-  Object.assign(userForm, row)
+  Object.assign(userForm, {
+    ...row,
+    password: '' // 编辑时不显示密码
+  })
 }
 
 // 删除用户
-const handleDelete = (row: User) => {
-  ElMessageBox.confirm('确定要删除该用户吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    const index = tableData.value.findIndex((item) => item.id === row.id)
-    if (index > -1) {
-      tableData.value.splice(index, 1)
-      pagination.total--
-      ElMessage.success('删除成功')
+const handleDelete = async (row: User) => {
+  try {
+    await ElMessageBox.confirm('确定要删除该用户吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await deleteUser(row.id)
+    ElMessage.success('删除成功')
+    loadUserList()
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      ElMessage.error(error.message || '删除失败')
     }
-  })
+  }
 }
 
 // 保存用户
 const handleSave = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
 
-  await formEl.validate((valid) => {
+  await formEl.validate(async (valid) => {
     if (valid) {
-      if (userForm.id) {
-        // 编辑
-        const index = tableData.value.findIndex((item) => item.id === userForm.id)
-        if (index > -1) {
-          tableData.value[index] = { ...tableData.value[index], ...userForm }
+      try {
+        if (userForm.id) {
+          // 编辑
+          await updateUser(userForm.id, userForm)
           ElMessage.success('编辑成功')
+        } else {
+          // 新增
+          if (!userForm.password) {
+            ElMessage.warning('请输入密码')
+            return
+          }
+          await createUser(userForm)
+          ElMessage.success('新增成功')
         }
-      } else {
-        // 新增
-        const newUser = {
-          ...userForm,
-          id: Date.now(),
-          createTime: formatDateTime()
-        }
-        tableData.value.unshift(newUser)
-        pagination.total++
-        ElMessage.success('新增成功')
+        dialogVisible.value = false
+        loadUserList()
+      } catch (error: any) {
+        ElMessage.error(error.message || '保存失败')
       }
-      dialogVisible.value = false
     }
   })
 }
@@ -157,26 +160,40 @@ const resetForm = () => {
   userForm.realName = ''
   userForm.email = ''
   userForm.phone = ''
-  userForm.role = 'user'
+  userForm.roleIds = []
   userForm.status = 1
   userForm.password = ''
 }
 
 // 切换状态
-const handleStatusChange = (row: User) => {
-  ElMessage.success(`已${row.status === 1 ? '启用' : '禁用'}该用户`)
+const handleStatusChange = async (row: User) => {
+  try {
+    await updateUser(row.id, { status: row.status })
+    ElMessage.success(`已${row.status === 1 ? '启用' : '禁用'}该用户`)
+  } catch (error: any) {
+    // 恢复原状态
+    row.status = row.status === 1 ? 0 : 1
+    ElMessage.error(error.message || '操作失败')
+  }
 }
 
 // 分页
 const handleSizeChange = (val: number) => {
   pagination.pageSize = val
-  handleSearch()
+  pagination.currentPage = 1
+  loadUserList()
 }
 
 const handleCurrentChange = (val: number) => {
   pagination.currentPage = val
-  handleSearch()
+  loadUserList()
 }
+
+// 初始化
+onMounted(() => {
+  loadRoleOptions()
+  loadUserList()
+})
 </script>
 
 <template>
@@ -199,8 +216,8 @@ const handleCurrentChange = (val: number) => {
             clearable
             style="width: 200px"
           >
-            <el-option label="启用" value="1" />
-            <el-option label="禁用" value="0" />
+            <el-option label="启用" :value="1" />
+            <el-option label="禁用" :value="0" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -223,10 +240,12 @@ const handleCurrentChange = (val: number) => {
         <el-table-column prop="realName" label="真实姓名" min-width="120" show-overflow-tooltip />
         <el-table-column prop="email" label="邮箱" min-width="200" show-overflow-tooltip />
         <el-table-column prop="phone" label="手机号" min-width="130" />
-        <el-table-column prop="role" label="角色" width="100" align="center">
+        <el-table-column prop="roleIds" label="角色" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-tag v-if="row.role === 'admin'" type="danger">管理员</el-tag>
-            <el-tag v-else type="primary">普通用户</el-tag>
+            <el-tag v-for="roleId in row.roleIds" :key="roleId" style="margin-right: 5px">
+              {{ roleOptions.find((r) => r.id === roleId)?.name || '未知角色' }}
+            </el-tag>
+            <span v-if="!row.roleIds || row.roleIds.length === 0" style="color: #999">未分配</span>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
@@ -311,10 +330,19 @@ const handleCurrentChange = (val: number) => {
         >
           <el-input v-model="userForm.phone" placeholder="请输入手机号" />
         </el-form-item>
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="userForm.role" placeholder="请选择角色">
-            <el-option label="管理员" value="admin" />
-            <el-option label="普通用户" value="user" />
+        <el-form-item label="角色" prop="roleIds">
+          <el-select
+            v-model="userForm.roleIds"
+            multiple
+            placeholder="请选择角色"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="role in roleOptions"
+              :key="role.id"
+              :label="role.name"
+              :value="role.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="状态" prop="status">
