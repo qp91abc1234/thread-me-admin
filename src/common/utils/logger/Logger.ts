@@ -1,6 +1,6 @@
-import type { LogTransport, LogExtra, LogRecord } from './types.d'
-import { LogLevel } from './types.d'
-import { ConsoleTransport } from './transports/ConsoleTransport'
+import type { LogTransport, LogExtra, LogRecord } from './types'
+import { LogLevel } from './types'
+import { ConsoleTransport } from './transports/console-transport'
 
 /**
  * 日志管理器

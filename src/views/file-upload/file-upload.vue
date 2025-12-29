@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload, View, Document, RefreshRight } from '@element-plus/icons-vue'
-import { uploadFiles, uploadChunk, mergeChunks } from '@/common/api/fileUpload'
+import { uploadFiles, uploadChunk, mergeChunks } from '@/common/api/file-upload'
 import {
   createFileChunks,
   CHUNK_SIZE,

@@ -2,11 +2,11 @@
  * Storage 工具模块
  */
 
-import { createStorageObject } from './createStorageObject'
+import { createStorageObject } from './create-storage-object'
 import type { LocalStorage, SessionStorage } from './types'
 
 // 导出类型
-export { createStorageRef } from './storageRef'
+export { createStorageRef } from './storage-ref'
 
 // 导出常量
 export { LOCAL_STORAGE_KEYS, SESSION_STORAGE_KEYS } from './constants'

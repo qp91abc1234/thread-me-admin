@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { useContext } from '@/common/hooks/useContext'
+import { useContext } from '@/common/hooks/use-context'
 import { getRoleList } from '@/common/api/role'
 import type { Role } from '@/common/types/permission'
 

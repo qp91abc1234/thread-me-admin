@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 
-import { useAppStore } from '@/store/modules/appStore'
-import { usePermissionStore } from '@/store/modules/permissionStore'
+import { useAppStore } from '@/store/modules/app-store'
+import { usePermissionStore } from '@/store/modules/permission-store'
 
-import SubMenu from '@/modules/layout/sider/subMenu.vue'
+import SubMenu from '@/modules/layout/sider/sub-menu.vue'
 
 const route = useRoute()
 const permissionStore = usePermissionStore()

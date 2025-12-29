@@ -3,8 +3,8 @@ import { useRoute } from 'vue-router'
 import { ref, computed, nextTick } from 'vue'
 import { Fold, Moon, Sunny, Expand, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 
-import { useAppStore } from '@/store/modules/appStore'
-import { usePermissionStore } from '@/store/modules/permissionStore'
+import { useAppStore } from '@/store/modules/app-store'
+import { usePermissionStore } from '@/store/modules/permission-store'
 
 import { setCssVar } from '@/common/utils/css'
 

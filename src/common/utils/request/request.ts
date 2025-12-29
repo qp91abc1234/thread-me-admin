@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosError, type AxiosResponse } from 'axios'
 
-import { useUserStore } from '@/store/modules/userStore'
+import { useUserStore } from '@/store/modules/user-store'
 
 /**
  * 刷新 token 队列中的任务

@@ -21,7 +21,7 @@
  */
 import { ref, computed, useSlots } from 'vue'
 
-import { vTextTruncated } from './vTextTruncated'
+import { vTextTruncated } from './v-text-truncated'
 
 const props = withDefaults(
   defineProps<{

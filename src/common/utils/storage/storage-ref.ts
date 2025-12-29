@@ -1,5 +1,5 @@
 import { onScopeDispose, ref, watch } from 'vue'
-import { createStorageObject } from './createStorageObject'
+import { createStorageObject } from './create-storage-object'
 import type { StorageRefOptions } from './types'
 
 /**

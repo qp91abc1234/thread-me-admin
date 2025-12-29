@@ -1,5 +1,5 @@
 import type { LogExtra } from './types'
-import { Logger } from './Logger'
+import { Logger } from './logger'
 
 /**
  * 带标签的日志器

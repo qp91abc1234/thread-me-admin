@@ -3,7 +3,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { setupPinia } from '@/store/index.ts'
 import { setupRouter } from '@/router/index.ts'
-import { setupErrorHandling } from '@/common/utils/setupErrorHandling'
+import { setupErrorHandling } from '@/common/utils/setup-error-handling'
 import { setupGlobalComponents } from './components'
 
 import 'element-plus/es/components/message/style/css'

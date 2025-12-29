@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { usePermissionStore } from '../permissionStore'
+import { usePermissionStore } from '../permission-store'
 import { createStorageRef } from '@/common/utils/storage'
 
 /** 标签页数据结构 */

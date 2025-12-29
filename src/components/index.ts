@@ -1,4 +1,4 @@
-import GFlex from '@/components/gFlex/gFlex.vue'
+import GFlex from '@/components/g-flex/g-flex.vue'
 
 import type { App } from 'vue'
 

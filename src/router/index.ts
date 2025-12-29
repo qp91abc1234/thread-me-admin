@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { useAppStore } from '@/store/modules/appStore'
-import { allRoutes, buildAsyncRoutes } from './routeSetting'
-import { useUserStore } from '@/store/modules/userStore'
+import { useAppStore } from '@/store/modules/app-store'
+import { allRoutes, buildAsyncRoutes } from './route-setting'
+import { useUserStore } from '@/store/modules/user-store'
 import type { App } from 'vue'
 
 /** 项目名称（从环境变量读取） */

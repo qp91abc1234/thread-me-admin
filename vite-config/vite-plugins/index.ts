@@ -7,10 +7,10 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import dayjs from 'dayjs'
 
-import ViteHtmlTransform from './viteHtmlTransform'
-import viteImgCompress from './viteImgCompress'
-import viteImgUpload from './viteImgUpload'
-import { setupMockPlugin } from './viteMock'
+import ViteHtmlTransform from './vite-html-transform'
+import viteImgCompress from './vite-img-compress'
+import viteImgUpload from './vite-img-upload'
+import { setupMockPlugin } from './vite-mock'
 
 import type { PluginOption } from 'vite'
 

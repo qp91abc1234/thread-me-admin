@@ -3,7 +3,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { Lock, User } from '@element-plus/icons-vue'
 import { type FormRules, type FormInstance, ElMessage } from 'element-plus'
-import { useUserStore } from '@/store/modules/userStore'
+import { useUserStore } from '@/store/modules/user-store'
 
 const router = useRouter()
 const userStore = useUserStore()
