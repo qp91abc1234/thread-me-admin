@@ -4,6 +4,10 @@ import MenuTreePanel from './menu-tree-panel.vue'
 import MenuPermissionPanel from './menu-permission-panel.vue'
 import { useProvide } from './menu-context'
 
+defineOptions({
+  name: 'MenuPage'
+})
+
 // 提供菜单树 Context
 const { initContext } = useProvide()
 

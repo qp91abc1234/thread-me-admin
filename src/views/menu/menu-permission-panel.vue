@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import type { TransferKey } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
@@ -12,10 +12,32 @@ import type { ButtonPermission } from '@/common/types/permission'
 const buttonPermissionTable = ref<ButtonPermission[]>([])
 const buttonPermissionDialogRef = ref<InstanceType<typeof ButtonPermissionDialog>>()
 
-// 已选中的API权限code
-const selectedApiPermissionCodes = ref<string[]>([])
+// 缓存的原始API权限code（按node id存储，用于对比是否有修改）
+const cachedApiPermissionCodesMap = ref<Map<number, string[]>>(new Map())
+// 保存按钮加载状态
+const savingApiPermissions = ref(false)
 
 const { currentNode, allApiPermissions, loadingApiPermissions } = useInject()
+
+// 已选中的API权限code（直接操作缓存）
+const selectedApiPermissionCodes = computed({
+  get: () => {
+    if (!currentNode.value) return []
+    return cachedApiPermissionCodesMap.value.get(currentNode.value.id) || []
+  },
+  set: (value: string[]) => {
+    if (!currentNode.value) return
+    cachedApiPermissionCodesMap.value.set(currentNode.value.id, [...value])
+  }
+})
+
+// 判断API权限是否有修改（对比当前缓存值与节点原始值）
+const hasApiPermissionChanges = computed(() => {
+  if (!currentNode.value) return false
+  const current = [...selectedApiPermissionCodes.value].sort().join(',')
+  const original = [...(currentNode.value.apiPermissionCodes || [])].sort().join(',')
+  return current !== original
+})
 
 // 监听当前节点变化，加载权限数据
 watch(
@@ -33,35 +55,46 @@ watch(
         }
       })
       // 加载已选中的API权限
-      selectedApiPermissionCodes.value = node.apiPermissionCodes || []
+      const apiCodes = node.apiPermissionCodes || []
+      // 如果缓存中已有该节点的数据，保持不变；否则使用节点数据并缓存
+      if (!cachedApiPermissionCodesMap.value.has(node.id)) {
+        // 首次加载，使用节点数据并缓存
+        cachedApiPermissionCodesMap.value.set(node.id, [...apiCodes])
+      }
+      // 如果缓存中已有数据，会自动通过 computed 获取，不需要手动设置
     } else {
       buttonPermissionTable.value = []
-      selectedApiPermissionCodes.value = []
     }
   },
   { immediate: true }
 )
 
-// API权限穿梭框变化处理
-const handleApiPermissionChange = async (value: TransferKey[]) => {
-  if (!currentNode.value) return
-
+// API权限穿梭框变化处理（只更新缓存，不提交）
+const handleApiPermissionChange = (value: TransferKey[]) => {
   // 将 TransferKey[] 转换为 string[]
   const codes = value.map((key) => String(key))
-  const oldCodes = currentNode.value.apiPermissionCodes || []
+  selectedApiPermissionCodes.value = codes
+}
 
+// 保存API权限
+const handleSaveApiPermissions = async () => {
+  if (!currentNode.value) return
+
+  savingApiPermissions.value = true
   try {
+    const codes = [...selectedApiPermissionCodes.value]
     await updateMenu(currentNode.value.id, {
       apiPermissionCodes: codes
     })
-    // 直接更新当前节点的数据
+    // 更新当前节点的数据
     currentNode.value.apiPermissionCodes = codes
-    selectedApiPermissionCodes.value = codes
-    ElMessage.success('API权限更新成功')
+    // 更新缓存
+    cachedApiPermissionCodesMap.value.set(currentNode.value.id, [...codes])
+    ElMessage.success('API权限保存成功')
   } catch (error: any) {
-    ElMessage.error(error.message || '更新API权限失败')
-    // 恢复原值
-    selectedApiPermissionCodes.value = oldCodes
+    ElMessage.error(error.message || '保存API权限失败')
+  } finally {
+    savingApiPermissions.value = false
   }
 }
 
@@ -176,6 +209,15 @@ const handleButtonPermissionSuccess = async () => {
       <div class="permission-section">
         <div class="section-header">
           <span>API权限</span>
+          <el-button
+            v-if="hasApiPermissionChanges"
+            type="primary"
+            size="small"
+            :loading="savingApiPermissions"
+            @click="handleSaveApiPermissions"
+          >
+            保存
+          </el-button>
         </div>
         <div class="section-content section-content-transfer">
           <el-transfer

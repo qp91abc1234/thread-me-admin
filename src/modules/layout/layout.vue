@@ -11,7 +11,10 @@ const route = useRoute()
 const scrollbarRef = ref()
 
 const keepAliveInclude = computed(() => {
-  const KEEP_ALIVE_CFG_LIST = [{ name: 'FileUpload', path: '/tools/file-upload' }]
+  const KEEP_ALIVE_CFG_LIST = [
+    { name: 'FileUpload', path: '/tools/file-upload' },
+    { name: 'MenuPage', path: '/rbac/menu' }
+  ]
   const include: string[] = []
 
   KEEP_ALIVE_CFG_LIST.forEach((item) => {
