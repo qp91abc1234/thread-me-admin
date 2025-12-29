@@ -4,7 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Edit, Plus, Refresh, Search } from '@element-plus/icons-vue'
 import { getUserList, deleteUser, updateUser } from '@/common/api/user'
 import UserFormDialog from './user-form-dialog.vue'
-import { useProvide } from './context'
+import { useProvide } from './user-context'
 import type { User, UserQueryParams } from '@/common/types/user'
 
 const loading = ref(false)

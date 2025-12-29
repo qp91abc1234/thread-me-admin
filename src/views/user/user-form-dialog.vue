@@ -2,7 +2,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage, type FormInstance } from 'element-plus'
 import { createUser, updateUser } from '@/common/api/user'
-import { useInject } from './context'
+import { useInject } from './user-context'
 import type { User } from '@/common/types/user'
 
 const emit = defineEmits<{
