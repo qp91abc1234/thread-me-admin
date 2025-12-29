@@ -3,7 +3,7 @@ import { ref, watch, computed } from 'vue'
 import type { TransferKey } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { updateMenu } from '@/common/api/menu'
+import { updateMenu, getButtonPermissionsByIds, deleteButtonPermission } from '@/common/api/menu'
 import { useInject } from './menu-context'
 import ButtonPermissionDialog from './dialogs/button-permission-dialog.vue'
 import type { ButtonPermission } from '@/common/types/permission'
@@ -11,57 +11,65 @@ import type { ButtonPermission } from '@/common/types/permission'
 // 按钮权限表格数据
 const buttonPermissionTable = ref<ButtonPermission[]>([])
 const buttonPermissionDialogRef = ref<InstanceType<typeof ButtonPermissionDialog>>()
+// 加载按钮权限状态
+const loadingButtonPermissions = ref(false)
 
-// 缓存的原始API权限code（按node id存储，用于对比是否有修改）
-const cachedApiPermissionCodesMap = ref<Map<number, string[]>>(new Map())
+// 缓存的原始API权限id（按node id存储，用于对比是否有修改）
+const cachedApiPermissionIdsMap = ref<Map<number, number[]>>(new Map())
 // 保存按钮加载状态
 const savingApiPermissions = ref(false)
 
 const { currentNode, allApiPermissions, loadingApiPermissions } = useInject()
 
-// 已选中的API权限code（直接操作缓存）
-const selectedApiPermissionCodes = computed({
+// 已选中的API权限id（直接操作缓存）
+const selectedApiPermissionIds = computed({
   get: () => {
     if (!currentNode.value) return []
-    return cachedApiPermissionCodesMap.value.get(currentNode.value.id) || []
+    return cachedApiPermissionIdsMap.value.get(currentNode.value.id) || []
   },
-  set: (value: string[]) => {
+  set: (value: number[]) => {
     if (!currentNode.value) return
-    cachedApiPermissionCodesMap.value.set(currentNode.value.id, [...value])
+    cachedApiPermissionIdsMap.value.set(currentNode.value.id, [...value])
   }
 })
 
 // 判断API权限是否有修改（对比当前缓存值与节点原始值）
 const hasApiPermissionChanges = computed(() => {
   if (!currentNode.value) return false
-  const current = [...selectedApiPermissionCodes.value].sort().join(',')
-  const original = [...(currentNode.value.apiPermissionCodes || [])].sort().join(',')
+  const current = [...selectedApiPermissionIds.value].sort().join(',')
+  const original = [...(currentNode.value.apiPermissionIds || [])].sort().join(',')
   return current !== original
 })
 
 // 监听当前节点变化，加载权限数据
 watch(
   () => currentNode.value,
-  (node) => {
+  async (node) => {
     if (node) {
-      // 加载按钮权限
-      buttonPermissionTable.value = (node.buttonPermissionCodes || []).map((code) => {
-        // 从code中提取name（简化处理）
-        const name = code.split(':')[1] || code
-        return {
-          code,
-          name: name.charAt(0).toUpperCase() + name.slice(1),
-          hidden: false
+      // 根据 buttonPermissionIds 加载对应的按钮权限
+      const buttonIds = node.buttonPermissionIds || []
+      if (buttonIds.length > 0) {
+        loadingButtonPermissions.value = true
+        try {
+          buttonPermissionTable.value = await getButtonPermissionsByIds(buttonIds)
+        } catch (error: any) {
+          console.error('加载按钮权限失败:', error)
+          ElMessage.error(error.message || '加载按钮权限失败')
+          buttonPermissionTable.value = []
+        } finally {
+          loadingButtonPermissions.value = false
         }
-      })
-      // 加载已选中的API权限
-      const apiCodes = node.apiPermissionCodes || []
-      // 如果缓存中已有该节点的数据，保持不变；否则使用节点数据并缓存
-      if (!cachedApiPermissionCodesMap.value.has(node.id)) {
-        // 首次加载，使用节点数据并缓存
-        cachedApiPermissionCodesMap.value.set(node.id, [...apiCodes])
+      } else {
+        buttonPermissionTable.value = []
       }
-      // 如果缓存中已有数据，会自动通过 computed 获取，不需要手动设置
+
+      // 加载已选中的API权限
+      const apiIds = node.apiPermissionIds || []
+      // 如果缓存中已有该节点的数据，保持不变；否则使用节点数据并缓存
+      if (!cachedApiPermissionIdsMap.value.has(node.id)) {
+        // 首次加载，使用节点数据并缓存
+        cachedApiPermissionIdsMap.value.set(node.id, [...apiIds])
+      }
     } else {
       buttonPermissionTable.value = []
     }
@@ -71,9 +79,9 @@ watch(
 
 // API权限穿梭框变化处理（只更新缓存，不提交）
 const handleApiPermissionChange = (value: TransferKey[]) => {
-  // 将 TransferKey[] 转换为 string[]
-  const codes = value.map((key) => String(key))
-  selectedApiPermissionCodes.value = codes
+  // 将 TransferKey[] 转换为 number[]
+  const ids = value.map((key) => Number(key))
+  selectedApiPermissionIds.value = ids
 }
 
 // 保存API权限
@@ -82,14 +90,14 @@ const handleSaveApiPermissions = async () => {
 
   savingApiPermissions.value = true
   try {
-    const codes = [...selectedApiPermissionCodes.value]
+    const ids = [...selectedApiPermissionIds.value]
     await updateMenu(currentNode.value.id, {
-      apiPermissionCodes: codes
+      apiPermissionIds: ids
     })
     // 更新当前节点的数据
-    currentNode.value.apiPermissionCodes = codes
+    currentNode.value.apiPermissionIds = ids
     // 更新缓存
-    cachedApiPermissionCodesMap.value.set(currentNode.value.id, [...codes])
+    cachedApiPermissionIdsMap.value.set(currentNode.value.id, [...ids])
     ElMessage.success('API权限保存成功')
   } catch (error: any) {
     ElMessage.error(error.message || '保存API权限失败')
@@ -100,56 +108,33 @@ const handleSaveApiPermissions = async () => {
 
 // 添加按钮权限
 const handleAddButtonPermission = () => {
-  buttonPermissionDialogRef.value?.open()
+  buttonPermissionDialogRef.value?.open(null, buttonPermissionTable, currentNode)
 }
 
 // 编辑按钮权限
 const handleEditButtonPermission = (row: ButtonPermission) => {
-  buttonPermissionDialogRef.value?.open(row)
+  buttonPermissionDialogRef.value?.open(row, buttonPermissionTable, currentNode)
 }
 
 // 删除按钮权限
 const handleDeleteButtonPermission = async (row: ButtonPermission) => {
   if (!currentNode.value) return
 
-  const oldCodes = currentNode.value.buttonPermissionCodes || []
-
   try {
-    const newCodes = buttonPermissionTable.value
-      .filter((item) => item.code !== row.code)
-      .map((item) => item.code)
-    await updateMenu(currentNode.value.id, {
-      buttonPermissionCodes: newCodes
-    })
-    // 直接更新当前节点的数据
-    currentNode.value.buttonPermissionCodes = newCodes
-    buttonPermissionTable.value = buttonPermissionTable.value.filter(
-      (item) => item.code !== row.code
-    )
+    // 调用删除按钮权限的 API（Prisma 会自动处理关联关系）
+    await deleteButtonPermission(row.id)
+
+    // 删除成功后，直接从表格中移除该项
+    buttonPermissionTable.value = buttonPermissionTable.value.filter((item) => item.id !== row.id)
+
+    // 更新当前节点的 buttonPermissionIds
+    const buttonIds = currentNode.value.buttonPermissionIds || []
+    currentNode.value.buttonPermissionIds = buttonIds.filter((id) => id !== row.id)
+
     ElMessage.success('按钮权限删除成功')
   } catch (error: any) {
     ElMessage.error(error.message || '删除按钮权限失败')
-    // 恢复表格数据
-    buttonPermissionTable.value = (oldCodes || []).map((code) => {
-      const name = code.split(':')[1] || code
-      return {
-        code,
-        name: name.charAt(0).toUpperCase() + name.slice(1),
-        hidden: false
-      }
-    })
   }
-}
-
-// 按钮权限操作成功后的回调
-const handleButtonPermissionSuccess = async () => {
-  if (!currentNode.value) return
-
-  // 按钮权限弹窗保存时已经更新了服务端数据
-  // 从表格数据获取最新的按钮权限 codes（弹窗保存时已经更新了表格数据）
-  const newCodes = buttonPermissionTable.value.map((item) => item.code)
-  // 直接更新当前节点的数据，保持同步
-  currentNode.value.buttonPermissionCodes = newCodes
 }
 </script>
 
@@ -170,7 +155,7 @@ const handleButtonPermissionSuccess = async () => {
           </el-button>
         </div>
         <div class="section-content section-content-table">
-          <el-table :data="buttonPermissionTable" stripe border>
+          <el-table :data="buttonPermissionTable" stripe border :loading="loadingButtonPermissions">
             <el-table-column type="index" label="序号" width="60" align="center" />
             <el-table-column prop="code" label="权限Code" min-width="150" show-overflow-tooltip />
             <el-table-column prop="name" label="权限名称" min-width="120" show-overflow-tooltip />
@@ -221,9 +206,9 @@ const handleButtonPermissionSuccess = async () => {
         </div>
         <div class="section-content section-content-transfer">
           <el-transfer
-            v-model="selectedApiPermissionCodes"
+            v-model="selectedApiPermissionIds"
             :data="allApiPermissions"
-            :props="{ key: 'code', label: 'name' }"
+            :props="{ key: 'id', label: 'name' }"
             :titles="['可选API权限', '已选API权限']"
             :loading="loadingApiPermissions"
             filterable
@@ -255,7 +240,6 @@ const handleButtonPermissionSuccess = async () => {
     ref="buttonPermissionDialogRef"
     :menu-id="currentNode.id"
     :table-data="buttonPermissionTable"
-    @success="handleButtonPermissionSuccess"
   />
 </template>
 

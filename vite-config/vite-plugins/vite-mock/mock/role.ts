@@ -41,7 +41,7 @@ if (roleList.length > 0) {
 // 角色权限关联数据
 const rolePermissions: Record<
   number,
-  { menuIds: number[]; buttonPermissionCodes: string[]; apiPermissionCodes: string[] }
+  { menuIds: number[]; buttonPermissionIds: number[]; apiPermissionIds: number[] }
 > = {}
 
 export default [
@@ -203,8 +203,8 @@ export default [
       const id = parseInt(query.id)
       const permissions = rolePermissions[id] || {
         menuIds: [],
-        buttonPermissionCodes: [],
-        apiPermissionCodes: []
+        buttonPermissionIds: [],
+        apiPermissionIds: []
       }
       return {
         message: 'success',
@@ -227,8 +227,8 @@ export default [
 
       rolePermissions[id] = {
         menuIds: body.menuIds || [],
-        buttonPermissionCodes: body.buttonPermissionCodes || [],
-        apiPermissionCodes: body.apiPermissionCodes || []
+        buttonPermissionIds: body.buttonPermissionIds || [],
+        apiPermissionIds: body.apiPermissionIds || []
       }
 
       return {

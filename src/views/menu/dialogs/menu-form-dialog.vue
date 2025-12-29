@@ -29,8 +29,8 @@ const resetForm = (menu?: MenuItem | null) => {
   if (menu) {
     Object.assign(menuForm, {
       ...menu,
-      buttonPermissionCodes: menu.buttonPermissionCodes || [],
-      apiPermissionCodes: menu.apiPermissionCodes || []
+      buttonPermissionIds: menu.buttonPermissionIds || [],
+      apiPermissionIds: menu.apiPermissionIds || []
     })
   } else {
     Object.assign(menuForm, {

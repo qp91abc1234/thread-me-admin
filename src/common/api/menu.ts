@@ -3,7 +3,8 @@ import type {
   MenuItem,
   MenuTreeResponse,
   MenuSortParams,
-  ApiPermission
+  ApiPermission,
+  ButtonPermission
 } from '@/common/types/permission'
 
 /**
@@ -66,4 +67,51 @@ export function updateMenuSort(items: MenuSortParams[]): Promise<boolean> {
  */
 export function getAllApiPermissions(): Promise<ApiPermission[]> {
   return requestGet<ApiPermission[]>('/permission/list').then((res) => res.data)
+}
+
+/**
+ * 根据按钮权限 id 数组获取按钮权限列表
+ * @param ids 按钮权限 id 数组
+ * @returns 按钮权限列表
+ */
+export function getButtonPermissionsByIds(ids: number[]): Promise<ButtonPermission[]> {
+  if (!ids || ids.length === 0) {
+    return Promise.resolve([])
+  }
+  return requestPost<ButtonPermission[]>('/permission/button/list', { ids }).then((res) => res.data)
+}
+
+/**
+ * 创建按钮权限
+ * @param buttonPermission 按钮权限信息
+ * @returns 按钮权限信息
+ */
+export function createButtonPermission(
+  buttonPermission: Omit<ButtonPermission, 'id'>
+): Promise<ButtonPermission> {
+  return requestPost<ButtonPermission>('/permission/button', buttonPermission).then((res) => res.data)
+}
+
+/**
+ * 更新按钮权限
+ * @param id 按钮权限ID
+ * @param buttonPermission 按钮权限信息
+ * @returns 按钮权限信息
+ */
+export function updateButtonPermission(
+  id: number,
+  buttonPermission: Partial<Omit<ButtonPermission, 'id'>>
+): Promise<ButtonPermission> {
+  return requestPost<ButtonPermission>(`/permission/button/${id}`, buttonPermission, { method: 'PUT' }).then(
+    (res) => res.data
+  )
+}
+
+/**
+ * 删除按钮权限
+ * @param id 按钮权限ID
+ * @returns 是否成功
+ */
+export function deleteButtonPermission(id: number): Promise<boolean> {
+  return requestPost<boolean>(`/permission/button/${id}`, {}, { method: 'DELETE' }).then((res) => res.data)
 }

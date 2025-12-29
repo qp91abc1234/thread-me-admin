@@ -1,5 +1,6 @@
 // 按钮权限项
 export interface ButtonPermission {
+  id: number
   code: string
   name: string
   hidden: boolean
@@ -29,6 +30,7 @@ export type RouteConfigList = RouteConfig[]
 
 // API权限项
 export interface ApiPermission {
+  id: number
   code: string // 全局唯一，如 'GET:/api/user/list'
   name: string // API名称，如 '获取用户列表'
   method: string // HTTP方法，如 'GET', 'POST'
@@ -43,8 +45,8 @@ export interface MenuItem extends RouteConfig {
   parentId?: number // 父菜单ID，根菜单为undefined
   sort: number // 排序值
   status: number // 0-禁用，1-启用
-  buttonPermissionCodes: string[] // 关联的按钮权限code数组
-  apiPermissionCodes: string[] // 关联的API权限code数组
+  buttonPermissionIds: number[] // 关联的按钮权限id数组
+  apiPermissionIds: number[] // 关联的API权限id数组
   createTime?: string
   updateTime?: string
   children?: MenuItem[] // 子菜单
