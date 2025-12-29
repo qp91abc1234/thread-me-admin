@@ -2,28 +2,21 @@
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Edit, Plus } from '@element-plus/icons-vue'
-import { updateMenuSort } from '@/common/api/menu'
+import { updateMenuSort, deleteMenu } from '@/common/api/menu'
+import MenuFormDialog from './dialogs/menu-form-dialog.vue'
 import { useInject } from './menu-context'
 import type { MenuItem } from '@/common/types/permission'
 
-const emit = defineEmits<{
-  (e: 'add', parentNode?: MenuItem): void
-  (e: 'edit', node: MenuItem): void
-  (e: 'delete', node: MenuItem): void
-  (e: 'node-click', node: MenuItem): void
-}>()
-
-const menuTreeRef = ref()
 const { menuTree, loading, setCurrentNode, loadMenuTree } = useInject()
+const menuFormDialogRef = ref<InstanceType<typeof MenuFormDialog>>()
 
 // 菜单树节点点击
 const handleNodeClick = (data: MenuItem) => {
   setCurrentNode(data)
-  emit('node-click', data)
 }
 
 // 菜单树拖拽结束
-const handleDragEnd = async (dragNode: any, dropNode: any, dropType: string) => {
+const handleDragEnd = async (_dragNode: any, _dropNode: any, dropType: string) => {
   if (dropType === 'none') return
 
   // 构建排序数据
@@ -57,12 +50,12 @@ const handleDragEnd = async (dragNode: any, dropNode: any, dropType: string) => 
 
 // 新增菜单
 const handleAdd = (parentNode?: MenuItem) => {
-  emit('add', parentNode)
+  menuFormDialogRef.value?.open(null, parentNode)
 }
 
 // 编辑菜单
 const handleEdit = (node: MenuItem) => {
-  emit('edit', node)
+  menuFormDialogRef.value?.open(node)
 }
 
 // 删除菜单
@@ -73,10 +66,20 @@ const handleDelete = async (node: MenuItem) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    emit('delete', node)
-  } catch {
-    // 用户取消，不做处理
+    await deleteMenu(node.id)
+    ElMessage.success('删除成功')
+    setCurrentNode(null)
+    await loadMenuTree()
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      ElMessage.error(error.message || '删除失败')
+    }
   }
+}
+
+// 菜单表单保存成功
+const handleMenuFormSuccess = async () => {
+  await loadMenuTree()
 }
 </script>
 
@@ -90,7 +93,6 @@ const handleDelete = async (node: MenuItem) => {
     </template>
     <el-tree
       v-loading="loading"
-      ref="menuTreeRef"
       :data="menuTree"
       :props="{ children: 'children', label: 'title' }"
       node-key="id"
@@ -125,6 +127,9 @@ const handleDelete = async (node: MenuItem) => {
       </template>
     </el-tree>
   </el-card>
+
+  <!-- 菜单表单弹窗 -->
+  <MenuFormDialog ref="menuFormDialogRef" @success="handleMenuFormSuccess" />
 </template>
 
 <style lang="scss" scoped>
