@@ -1,5 +1,10 @@
 import { requestGet, requestPost } from '../utils/request'
-import type { MenuItem, MenuTreeResponse, MenuSortParams } from '@/common/types/permission'
+import type {
+  MenuItem,
+  MenuTreeResponse,
+  MenuSortParams,
+  ApiPermission
+} from '@/common/types/permission'
 
 /**
  * 获取菜单树
@@ -53,4 +58,12 @@ export function deleteMenu(id: number): Promise<boolean> {
  */
 export function updateMenuSort(items: MenuSortParams[]): Promise<boolean> {
   return requestPost<boolean>('/menu/sort', { items }, { method: 'PUT' }).then((res) => res.data)
+}
+
+/**
+ * 获取所有API权限列表
+ * @returns API权限列表
+ */
+export function getAllApiPermissions(): Promise<ApiPermission[]> {
+  return requestGet<ApiPermission[]>('/permission/list').then((res) => res.data)
 }

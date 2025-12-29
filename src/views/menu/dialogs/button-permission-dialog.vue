@@ -1,15 +1,24 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { type FormInstance } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import type { ButtonPermission } from '@/common/types/permission'
+import { updateMenu } from '@/common/api/menu'
+
+const props = defineProps<{
+  menuId: number
+  tableData: ButtonPermission[]
+}>()
 
 const emit = defineEmits<{
-  (e: 'success', data: ButtonPermission): void
+  (e: 'success'): void
 }>()
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增按钮权限')
 const formRef = ref<FormInstance>()
+const editingItem = ref<ButtonPermission | null>(null)
+const loading = ref(false)
 
 // 按钮权限表单
 const form = reactive<ButtonPermission>({
@@ -33,6 +42,7 @@ const resetForm = (data?: ButtonPermission | null) => {
 
 // 打开对话框
 const open = (data?: ButtonPermission | null) => {
+  editingItem.value = data || null
   if (data) {
     // 编辑模式
     dialogTitle.value = '编辑按钮权限'
@@ -49,10 +59,36 @@ const open = (data?: ButtonPermission | null) => {
 const handleSave = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
 
-  await formEl.validate((valid) => {
+  await formEl.validate(async (valid) => {
     if (valid) {
-      dialogVisible.value = false
-      emit('success', { ...form })
+      loading.value = true
+      try {
+        const newData = [...props.tableData]
+        if (editingItem.value) {
+          // 编辑模式：更新现有项
+          const index = newData.findIndex((item) => item.code === editingItem.value!.code)
+          if (index > -1) {
+            newData[index] = { ...form }
+          }
+        } else {
+          // 新增模式：添加到列表
+          newData.push({ ...form })
+        }
+
+        // 更新菜单的按钮权限
+        const buttonPermissionCodes = newData.map((item) => item.code)
+        await updateMenu(props.menuId, {
+          buttonPermissionCodes
+        })
+
+        ElMessage.success(editingItem.value ? '按钮权限更新成功' : '按钮权限添加成功')
+        dialogVisible.value = false
+        emit('success')
+      } catch (error: any) {
+        ElMessage.error(error.message || '操作失败')
+      } finally {
+        loading.value = false
+      }
     }
   })
 }
@@ -92,7 +128,7 @@ defineExpose({
 
     <template #footer>
       <el-button @click="handleCancel">取消</el-button>
-      <el-button type="primary" @click="handleSave(formRef)">确定</el-button>
+      <el-button type="primary" :loading="loading" @click="handleSave(formRef)">确定</el-button>
     </template>
   </el-dialog>
 </template>

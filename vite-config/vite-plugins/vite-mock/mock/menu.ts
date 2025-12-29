@@ -369,5 +369,51 @@ export default [
         data: true
       }
     }
+  },
+  // 获取所有API权限列表
+  {
+    url: '/api/permission/list',
+    method: 'get',
+    response: () => {
+      // 模拟所有可用的API权限列表
+      const allApiPermissions = [
+        // 用户相关API
+        { code: 'GET:/api/user/list', name: '/api/user/list', method: 'GET' },
+        { code: 'GET:/api/user/:id', name: '/api/user/:id', method: 'GET' },
+        { code: 'POST:/api/user', name: '/api/user', method: 'POST' },
+        { code: 'PUT:/api/user/:id', name: '/api/user/:id', method: 'PUT' },
+        { code: 'DELETE:/api/user/:id', name: '/api/user/:id', method: 'DELETE' },
+        // 角色相关API
+        { code: 'GET:/api/role/list', name: '/api/role/list', method: 'GET' },
+        { code: 'GET:/api/role/:id', name: '/api/role/:id', method: 'GET' },
+        { code: 'POST:/api/role', name: '/api/role', method: 'POST' },
+        { code: 'PUT:/api/role/:id', name: '/api/role/:id', method: 'PUT' },
+        { code: 'DELETE:/api/role/:id', name: '/api/role/:id', method: 'DELETE' },
+        // 菜单相关API
+        { code: 'GET:/api/menu/tree', name: '/api/menu/tree', method: 'GET' },
+        { code: 'GET:/api/menu/:id', name: '/api/menu/:id', method: 'GET' },
+        { code: 'POST:/api/menu', name: '/api/menu', method: 'POST' },
+        { code: 'PUT:/api/menu/:id', name: '/api/menu/:id', method: 'PUT' },
+        { code: 'DELETE:/api/menu/:id', name: '/api/menu/:id', method: 'DELETE' },
+        { code: 'PUT:/api/menu/sort', name: '/api/menu/sort', method: 'PUT' },
+        // 权限相关API
+        { code: 'GET:/api/permission/list', name: '/api/permission/list', method: 'GET' },
+        { code: 'GET:/api/permission/tree', name: '/api/permission/tree', method: 'GET' },
+        // 文件上传相关API
+        { code: 'POST:/api/file/upload', name: '/api/file/upload', method: 'POST' },
+        { code: 'GET:/api/file/:id', name: '/api/file/:id', method: 'GET' },
+        { code: 'DELETE:/api/file/:id', name: '/api/file/:id', method: 'DELETE' },
+        // 认证相关API
+        { code: 'POST:/api/auth/login', name: '/api/auth/login', method: 'POST' },
+        { code: 'POST:/api/auth/logout', name: '/api/auth/logout', method: 'POST' },
+        { code: 'GET:/api/auth/userinfo', name: '/api/auth/userinfo', method: 'GET' },
+        { code: 'POST:/api/auth/refresh', name: '/api/auth/refresh', method: 'POST' }
+      ]
+
+      return {
+        message: 'success',
+        data: allApiPermissions
+      }
+    }
   }
 ] as MockMethod[]
