@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 
 import { createStorageRef } from '@/common/utils/storage'
-import { useMobile } from './hooks/useMobile'
-import { useTabs } from './hooks/useTabs'
-import { useTheme } from './hooks/useTheme'
-import { useVConsole } from './hooks/useVconsole'
+import { useMobile } from './hooks/use-mobile'
+import { useTabs } from './hooks/use-tabs'
+import { useTheme } from './hooks/use-theme'
+import { useVConsole } from './hooks/use-vconsole'
 
 /**
  * 应用全局状态 Store
