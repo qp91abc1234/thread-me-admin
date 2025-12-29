@@ -4,8 +4,8 @@ import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { updateMenu } from '@/common/api/menu'
 import { useInject } from './menu-context'
-import ButtonPermissionDialog from './button-permission-dialog.vue'
-import ApiPermissionDialog from './api-permission-dialog.vue'
+import ButtonPermissionDialog from './dialogs/button-permission-dialog.vue'
+import ApiPermissionDialog from './dialogs/api-permission-dialog.vue'
 import type { ButtonPermission, ApiPermission } from '@/common/types/permission'
 
 // 按钮权限表格数据
