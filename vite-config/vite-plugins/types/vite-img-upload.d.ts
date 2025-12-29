@@ -66,4 +66,3 @@ export type OutputBundle = Record<string, OutputAsset | OutputChunk>
 export interface CacheData {
   images: Record<string, { url: string; uploadedAt: number }>
 }
-

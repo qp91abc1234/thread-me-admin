@@ -83,4 +83,3 @@ export interface OutputChunk {
 }
 
 export type OutputBundle = Record<string, OutputAsset | OutputChunk>
-

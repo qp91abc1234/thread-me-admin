@@ -32,4 +32,3 @@ export interface ViteHtmlTransformOptions {
  * 默认的 HTML 压缩配置
  */
 export type { MinifyOptions }
-

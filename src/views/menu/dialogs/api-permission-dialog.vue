@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { ElMessage, type FormInstance } from 'element-plus'
+import { type FormInstance } from 'element-plus'
 import type { ApiPermission } from '@/common/types/permission'
 
 const emit = defineEmits<{
@@ -105,4 +105,3 @@ defineExpose({
     </template>
   </el-dialog>
 </template>
-

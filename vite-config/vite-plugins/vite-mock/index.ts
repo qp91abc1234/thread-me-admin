@@ -14,4 +14,3 @@ export function setupMockPlugin(isBuild: boolean): PluginOption {
     logger: true // 显示日志
   })
 }
-
