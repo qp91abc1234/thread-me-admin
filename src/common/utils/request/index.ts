@@ -75,3 +75,47 @@ export function requestPost<T = any, D = any>(
     ...config
   })
 }
+
+/**
+ * PUT 请求语法糖
+ * @param url - 请求地址
+ * @param data - 请求体
+ * @param config - 额外 Axios 配置
+ *
+ * @example
+ * const res = await reqPut<UserInfo>('/user/123', { username: 'admin', email: 'admin@example.com' })
+ */
+export function reqPut<T = any, D = any>(
+  url: string,
+  data?: D,
+  config: AxiosRequestConfig<D> = {}
+): Promise<ApiResponse<T>> {
+  return request<T>({
+    url,
+    method: 'PUT',
+    data,
+    ...config
+  })
+}
+
+/**
+ * DELETE 请求语法糖
+ * @param url - 请求地址
+ * @param config - 额外 Axios 配置（可包含 params、data 等）
+ *
+ * @example
+ * const res = await reqDelete('/user/123')
+ *
+ * @example
+ * const res = await reqDelete('/user/123', { params: { force: true } })
+ */
+export function reqDelete<T = any>(
+  url: string,
+  config: AxiosRequestConfig = {}
+): Promise<ApiResponse<T>> {
+  return request<T>({
+    url,
+    method: 'DELETE',
+    ...config
+  })
+}

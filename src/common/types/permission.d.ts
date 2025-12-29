@@ -37,33 +37,6 @@ export interface ApiPermission {
 // API权限列表
 export type ApiPermissionList = ApiPermission[]
 
-// 用户信息
-export interface User {
-  id: number
-  username: string
-  realName: string
-  email: string
-  phone: string
-  roleIds: number[] // 角色ID数组（多对多）
-  status: number // 0-禁用，1-启用
-  createTime: string
-  updateTime?: string
-}
-
-// 用户列表查询参数
-export interface UserQueryParams {
-  username?: string
-  status?: number
-  currentPage: number
-  pageSize: number
-}
-
-// 用户列表响应
-export interface UserListResponse {
-  list: User[]
-  total: number
-}
-
 // 角色信息
 export interface Role {
   id: number

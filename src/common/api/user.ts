@@ -1,5 +1,11 @@
-import { requestGet, requestPost } from '../utils/request'
-import type { User, UserQueryParams, UserListResponse } from '@/common/types/permission'
+import { reqDelete, reqPut, requestGet, requestPost } from '../utils/request'
+import type {
+  User,
+  UserQueryParams,
+  UserListResponse,
+  UpdateUser,
+  CreateUser
+} from '@/common/types/user'
 
 /**
  * 获取用户列表
@@ -24,7 +30,7 @@ export function getUserDetail(id: number): Promise<User> {
  * @param user 用户信息
  * @returns 用户信息
  */
-export function createUser(user: Partial<User> & { password: string }): Promise<User> {
+export function createUser(user: CreateUser): Promise<User> {
   return requestPost<User>('/user', user).then((res) => res.data)
 }
 
@@ -34,8 +40,8 @@ export function createUser(user: Partial<User> & { password: string }): Promise<
  * @param user 用户信息
  * @returns 用户信息
  */
-export function updateUser(id: number, user: Partial<User>): Promise<User> {
-  return requestPost<User>(`/user/${id}`, user, { method: 'PUT' }).then((res) => res.data)
+export function updateUser(id: number, user: UpdateUser): Promise<User> {
+  return reqPut<User>(`/user/${id}`, user).then((res) => res.data)
 }
 
 /**
@@ -44,5 +50,5 @@ export function updateUser(id: number, user: Partial<User>): Promise<User> {
  * @returns 是否成功
  */
 export function deleteUser(id: number): Promise<boolean> {
-  return requestPost<boolean>(`/user/${id}`, {}, { method: 'DELETE' }).then((res) => res.data)
+  return reqDelete<boolean>(`/user/${id}`).then((res) => res.data)
 }

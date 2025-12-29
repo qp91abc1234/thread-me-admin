@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
+import { ref, reactive } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Edit, Plus, Refresh, Search } from '@element-plus/icons-vue'
-import { getUserList, createUser, updateUser, deleteUser } from '@/common/api/user'
-import { getRoleList } from '@/common/api/role'
-import type { User, UserQueryParams } from '@/common/types/permission'
-import type { Role } from '@/common/types/permission'
+import { getUserList, deleteUser, updateUser } from '@/common/api/user'
+import UserFormDialog from './user-form-dialog.vue'
+import { useProvide } from './context'
+import type { User, UserQueryParams } from '@/common/types/user'
 
 const loading = ref(false)
-const dialogVisible = ref(false)
-const dialogTitle = ref('新增用户')
-const userFormRef = ref<FormInstance>()
+const userFormDialogRef = ref<InstanceType<typeof UserFormDialog>>()
+
+// 提供角色列表 Context
+const { initContext, roleOptions } = useProvide()
 
 // 搜索表单
 const searchForm = reactive<UserQueryParams>({
@@ -20,18 +21,6 @@ const searchForm = reactive<UserQueryParams>({
   pageSize: 10
 })
 
-// 用户表单
-const userForm = reactive<Partial<User> & { password: string }>({
-  id: 0,
-  username: '',
-  realName: '',
-  email: '',
-  phone: '',
-  roleIds: [],
-  status: 1,
-  password: ''
-})
-
 // 表格数据
 const tableData = ref<User[]>([])
 const pagination = reactive({
@@ -39,22 +28,6 @@ const pagination = reactive({
   pageSize: 10,
   total: 0
 })
-
-// 角色列表（用于下拉选择）
-const roleOptions = ref<Role[]>([])
-
-// 加载角色列表
-const loadRoleOptions = async () => {
-  try {
-    const res = await getRoleList({
-      currentPage: 1,
-      pageSize: 1000
-    })
-    roleOptions.value = res.list
-  } catch (error) {
-    console.error('加载角色列表失败:', error)
-  }
-}
 
 // 加载用户列表
 const loadUserList = async () => {
@@ -91,19 +64,12 @@ const handleReset = () => {
 
 // 新增用户
 const handleAdd = () => {
-  dialogTitle.value = '新增用户'
-  dialogVisible.value = true
-  resetForm()
+  userFormDialogRef.value?.open()
 }
 
 // 编辑用户
 const handleEdit = (row: User) => {
-  dialogTitle.value = '编辑用户'
-  dialogVisible.value = true
-  Object.assign(userForm, {
-    ...row,
-    password: '' // 编辑时不显示密码
-  })
+  userFormDialogRef.value?.open(row)
 }
 
 // 删除用户
@@ -122,47 +88,6 @@ const handleDelete = async (row: User) => {
       ElMessage.error(error.message || '删除失败')
     }
   }
-}
-
-// 保存用户
-const handleSave = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-
-  await formEl.validate(async (valid) => {
-    if (valid) {
-      try {
-        if (userForm.id) {
-          // 编辑
-          await updateUser(userForm.id, userForm)
-          ElMessage.success('编辑成功')
-        } else {
-          // 新增
-          if (!userForm.password) {
-            ElMessage.warning('请输入密码')
-            return
-          }
-          await createUser(userForm)
-          ElMessage.success('新增成功')
-        }
-        dialogVisible.value = false
-        loadUserList()
-      } catch (error: any) {
-        ElMessage.error(error.message || '保存失败')
-      }
-    }
-  })
-}
-
-// 重置表单
-const resetForm = () => {
-  userForm.id = 0
-  userForm.username = ''
-  userForm.realName = ''
-  userForm.email = ''
-  userForm.phone = ''
-  userForm.roleIds = []
-  userForm.status = 1
-  userForm.password = ''
 }
 
 // 切换状态
@@ -190,10 +115,12 @@ const handleCurrentChange = (val: number) => {
 }
 
 // 初始化
-onMounted(() => {
-  loadRoleOptions()
+const init = async () => {
+  await initContext()
   loadUserList()
-})
+}
+
+init()
 </script>
 
 <template>
@@ -282,97 +209,60 @@ onMounted(() => {
     </el-card>
 
     <!-- 用户表单弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
-      <el-form ref="userFormRef" :model="userForm" label-width="100px">
-        <el-form-item
-          label="用户名"
-          prop="username"
-          :rules="[{ required: true, message: '请输入用户名', trigger: 'blur' }]"
-        >
-          <el-input v-model="userForm.username" placeholder="请输入用户名" />
-        </el-form-item>
-        <el-form-item
-          v-if="!userForm.id"
-          label="密码"
-          prop="password"
-          :rules="[{ required: true, message: '请输入密码', trigger: 'blur' }]"
-        >
-          <el-input v-model="userForm.password" type="password" placeholder="请输入密码" />
-        </el-form-item>
-        <el-form-item
-          label="真实姓名"
-          prop="realName"
-          :rules="[{ required: true, message: '请输入真实姓名', trigger: 'blur' }]"
-        >
-          <el-input v-model="userForm.realName" placeholder="请输入真实姓名" />
-        </el-form-item>
-        <el-form-item
-          label="邮箱"
-          prop="email"
-          :rules="[
-            { required: true, message: '请输入邮箱', trigger: 'blur' },
-            { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
-          ]"
-        >
-          <el-input v-model="userForm.email" placeholder="请输入邮箱" />
-        </el-form-item>
-        <el-form-item
-          label="手机号"
-          prop="phone"
-          :rules="[
-            { required: true, message: '请输入手机号', trigger: 'blur' },
-            {
-              pattern: /^1[3-9]\d{9}$/,
-              message: '请输入正确的手机号',
-              trigger: 'blur'
-            }
-          ]"
-        >
-          <el-input v-model="userForm.phone" placeholder="请输入手机号" />
-        </el-form-item>
-        <el-form-item label="角色" prop="roleIds">
-          <el-select
-            v-model="userForm.roleIds"
-            multiple
-            placeholder="请选择角色"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="role in roleOptions"
-              :key="role.id"
-              :label="role.name"
-              :value="role.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="userForm.status">
-            <el-radio :value="1">启用</el-radio>
-            <el-radio :value="0">禁用</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave(userFormRef)">确定</el-button>
-      </template>
-    </el-dialog>
+    <UserFormDialog ref="userFormDialogRef" @success="loadUserList" />
   </div>
 </template>
 
 <style lang="scss" scoped>
 .user-page {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: 20px;
+  overflow: hidden;
 
   .search-card,
-  .toolbar-card,
-  .table-card {
+  .toolbar-card {
+    display: block;
+    flex-shrink: 0;
     margin-bottom: 20px;
+  }
+
+  .table-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+
+    // stylelint-disable-next-line selector-class-pattern
+    :deep(.el-card__body) {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+  }
+
+  // stylelint-disable-next-line selector-class-pattern
+  :deep(.el-table) {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  // stylelint-disable-next-line selector-class-pattern
+  :deep(.el-table__body-wrapper) {
+    max-height: 100%;
+    overflow-y: auto;
   }
 
   .pagination {
     display: flex;
+    flex-shrink: 0;
     justify-content: flex-end;
     margin-top: 20px;
   }
