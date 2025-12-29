@@ -199,7 +199,7 @@ init()
           <template #default="{ row }">
             <el-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</el-button>
             <el-button type="success" link :icon="Key" @click="handlePermissionConfig(row)">
-              权限配置
+              菜单权限
             </el-button>
             <el-button type="danger" link :icon="Delete" @click="handleDelete(row)">删除</el-button>
           </template>

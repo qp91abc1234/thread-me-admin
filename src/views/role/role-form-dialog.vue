@@ -13,7 +13,7 @@ const dialogTitle = ref('新增角色')
 const roleFormRef = ref<FormInstance>()
 
 // 角色表单
-const roleForm = reactive<Partial<Role>>({
+const roleForm = reactive({
   id: 0,
   code: '',
   name: '',
@@ -125,4 +125,3 @@ defineExpose({
     </template>
   </el-dialog>
 </template>
-

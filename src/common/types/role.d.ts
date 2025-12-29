@@ -31,8 +31,7 @@ export interface RoleListResponse {
 }
 
 // 角色权限信息（用于权限配置）
+// 注意：按钮权限和API权限在菜单管理页面配置，角色只需配置菜单权限
 export interface RolePermission {
   menuIds: number[] // 菜单ID数组
-  buttonPermissionCodes: string[] // 按钮权限code数组
-  apiPermissionCodes: string[] // API权限code数组
 }
