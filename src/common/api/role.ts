@@ -3,8 +3,10 @@ import type {
   Role,
   RoleQueryParams,
   RoleListResponse,
-  RolePermission
-} from '@/common/types/permission'
+  RolePermission,
+  UpdateRole,
+  CreateRole
+} from '@/common/types/role'
 
 /**
  * 获取角色列表
@@ -29,7 +31,7 @@ export function getRoleDetail(id: number): Promise<Role> {
  * @param role 角色信息
  * @returns 角色信息
  */
-export function createRole(role: Partial<Role>): Promise<Role> {
+export function createRole(role: CreateRole): Promise<Role> {
   return requestPost<Role>('/role', role).then((res) => res.data)
 }
 
@@ -39,7 +41,7 @@ export function createRole(role: Partial<Role>): Promise<Role> {
  * @param role 角色信息
  * @returns 角色信息
  */
-export function updateRole(id: number, role: Partial<Role>): Promise<Role> {
+export function updateRole(id: number, role: UpdateRole): Promise<Role> {
   return requestPost<Role>(`/role/${id}`, role, { method: 'PUT' }).then((res) => res.data)
 }
 

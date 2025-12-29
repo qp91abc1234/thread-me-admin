@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { useContext } from '@/common/hooks/use-context'
 import { getRoleList } from '@/common/api/role'
-import type { Role } from '@/common/types/permission'
+import type { Role } from '@/common/types/role'
 
 /**
  * 用户页面 Context

@@ -1,24 +1,19 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
+import { ref, reactive } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Edit, Plus, Refresh, Search, Key } from '@element-plus/icons-vue'
-import {
-  getRoleList,
-  createRole,
-  updateRole,
-  deleteRole,
-  getRolePermissions,
-  assignRolePermissions
-} from '@/common/api/role'
-import { getMenuTree } from '@/common/api/menu'
-import type { Role, RoleQueryParams } from '@/common/types/permission'
-import type { MenuItem, RolePermission } from '@/common/types/permission'
+import { getRoleList, deleteRole, updateRole } from '@/common/api/role'
+import RoleFormDialog from './role-form-dialog.vue'
+import RolePermissionDialog from './role-permission-dialog.vue'
+import { useProvide } from './role-context'
+import type { Role, RoleQueryParams } from '@/common/types/role'
 
 const loading = ref(false)
-const dialogVisible = ref(false)
-const permissionDialogVisible = ref(false)
-const dialogTitle = ref('新增角色')
-const roleFormRef = ref<FormInstance>()
+const roleFormDialogRef = ref<InstanceType<typeof RoleFormDialog>>()
+const rolePermissionDialogRef = ref<InstanceType<typeof RolePermissionDialog>>()
+
+// 提供菜单树 Context
+const { initContext } = useProvide()
 
 // 搜索表单
 const searchForm = reactive<RoleQueryParams>({
@@ -29,15 +24,6 @@ const searchForm = reactive<RoleQueryParams>({
   pageSize: 10
 })
 
-// 角色表单
-const roleForm = reactive<Partial<Role>>({
-  id: 0,
-  code: '',
-  name: '',
-  description: '',
-  status: 1
-})
-
 // 表格数据
 const tableData = ref<Role[]>([])
 const pagination = reactive({
@@ -45,23 +31,6 @@ const pagination = reactive({
   pageSize: 10,
   total: 0
 })
-
-// 权限配置相关
-const currentRoleId = ref<number>(0)
-const menuTree = ref<MenuItem[]>([])
-const menuTreeRef = ref()
-const permissionForm = reactive<RolePermission>({
-  menuIds: [],
-  buttonPermissionCodes: [],
-  apiPermissionCodes: []
-})
-
-// 所有按钮权限和API权限（从菜单树中提取）
-const allButtonPermissions = ref<Array<{ code: string; name: string }>>([])
-const allApiPermissions = ref<Array<{ code: string; name: string; method: string }>>([])
-
-// 权限配置弹窗分割面板大小
-const splitSize = ref(0.4)
 
 // 加载角色列表
 const loadRoleList = async () => {
@@ -84,73 +53,6 @@ const loadRoleList = async () => {
   }
 }
 
-// 加载菜单树
-const loadMenuTree = async () => {
-  try {
-    const res = await getMenuTree()
-    menuTree.value = res.tree
-    // 提取所有按钮权限和API权限
-    extractPermissions(res.tree)
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载菜单树失败')
-  }
-}
-
-// 从菜单树中提取所有按钮权限和API权限
-const extractPermissions = (menus: MenuItem[]) => {
-  const buttonSet = new Set<string>()
-  const apiSet = new Set<string>()
-  const buttonMap = new Map<string, string>()
-  const apiMap = new Map<string, { method: string; name: string }>()
-
-  const traverse = (items: MenuItem[]) => {
-    items.forEach((menu) => {
-      // 提取按钮权限
-      if (menu.buttonPermissionCodes && menu.buttonPermissionCodes.length > 0) {
-        menu.buttonPermissionCodes.forEach((code) => {
-          if (!buttonSet.has(code)) {
-            buttonSet.add(code)
-            // 从code中提取name（简化处理，实际应该从后端获取）
-            const name = code.split(':')[1] || code
-            buttonMap.set(code, name.charAt(0).toUpperCase() + name.slice(1))
-          }
-        })
-      }
-
-      // 提取API权限
-      if (menu.apiPermissionCodes && menu.apiPermissionCodes.length > 0) {
-        menu.apiPermissionCodes.forEach((code) => {
-          if (!apiSet.has(code)) {
-            apiSet.add(code)
-            // 解析API权限code，格式：METHOD:/api/path
-            const parts = code.split(':')
-            const method = parts[0] || 'GET'
-            const path = parts.slice(1).join(':')
-            apiMap.set(code, { method, name: path })
-          }
-        })
-      }
-
-      if (menu.children && menu.children.length > 0) {
-        traverse(menu.children)
-      }
-    })
-  }
-
-  traverse(menus)
-
-  allButtonPermissions.value = Array.from(buttonMap.entries()).map(([code, name]) => ({
-    code,
-    name
-  }))
-
-  allApiPermissions.value = Array.from(apiMap.entries()).map(([code, { method, name }]) => ({
-    code,
-    name,
-    method
-  }))
-}
-
 // 搜索
 const handleSearch = () => {
   pagination.currentPage = 1
@@ -167,16 +69,12 @@ const handleReset = () => {
 
 // 新增角色
 const handleAdd = () => {
-  dialogTitle.value = '新增角色'
-  dialogVisible.value = true
-  resetForm()
+  roleFormDialogRef.value?.open()
 }
 
 // 编辑角色
 const handleEdit = (row: Role) => {
-  dialogTitle.value = '编辑角色'
-  dialogVisible.value = true
-  Object.assign(roleForm, row)
+  roleFormDialogRef.value?.open(row)
 }
 
 // 删除角色
@@ -197,40 +95,6 @@ const handleDelete = async (row: Role) => {
   }
 }
 
-// 保存角色
-const handleSave = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-
-  await formEl.validate(async (valid) => {
-    if (valid) {
-      try {
-        if (roleForm.id) {
-          // 编辑
-          await updateRole(roleForm.id, roleForm)
-          ElMessage.success('编辑成功')
-        } else {
-          // 新增
-          await createRole(roleForm)
-          ElMessage.success('新增成功')
-        }
-        dialogVisible.value = false
-        loadRoleList()
-      } catch (error: any) {
-        ElMessage.error(error.message || '保存失败')
-      }
-    }
-  })
-}
-
-// 重置表单
-const resetForm = () => {
-  roleForm.id = 0
-  roleForm.code = ''
-  roleForm.name = ''
-  roleForm.description = ''
-  roleForm.status = 1
-}
-
 // 切换状态
 const handleStatusChange = async (row: Role) => {
   try {
@@ -244,47 +108,8 @@ const handleStatusChange = async (row: Role) => {
 }
 
 // 打开权限配置弹窗
-const handlePermissionConfig = async (row: Role) => {
-  currentRoleId.value = row.id
-  permissionDialogVisible.value = true
-
-  // 加载菜单树（如果还没加载）
-  if (menuTree.value.length === 0) {
-    await loadMenuTree()
-  }
-
-  // 加载角色权限
-  try {
-    const permissions = await getRolePermissions(row.id)
-    permissionForm.menuIds = permissions.menuIds || []
-    permissionForm.buttonPermissionCodes = permissions.buttonPermissionCodes || []
-    permissionForm.apiPermissionCodes = permissions.apiPermissionCodes || []
-
-    // 设置菜单树选中状态
-    if (menuTreeRef.value) {
-      menuTreeRef.value.setCheckedKeys(permissionForm.menuIds)
-    }
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载权限失败')
-  }
-}
-
-// 菜单树节点选中变化
-const handleMenuTreeCheck = () => {
-  const checkedKeys = menuTreeRef.value.getCheckedKeys()
-  const halfCheckedKeys = menuTreeRef.value.getHalfCheckedKeys()
-  permissionForm.menuIds = [...checkedKeys, ...halfCheckedKeys]
-}
-
-// 保存权限配置
-const handleSavePermissions = async () => {
-  try {
-    await assignRolePermissions(currentRoleId.value, permissionForm)
-    ElMessage.success('权限配置成功')
-    permissionDialogVisible.value = false
-  } catch (error: any) {
-    ElMessage.error(error.message || '保存权限失败')
-  }
+const handlePermissionConfig = (row: Role) => {
+  rolePermissionDialogRef.value?.open(row.id)
 }
 
 // 分页
@@ -300,10 +125,12 @@ const handleCurrentChange = (val: number) => {
 }
 
 // 初始化
-onMounted(() => {
+const init = async () => {
+  await initContext()
   loadRoleList()
-  loadMenuTree()
-})
+}
+
+init()
 </script>
 
 <template>
@@ -394,144 +221,65 @@ onMounted(() => {
     </el-card>
 
     <!-- 角色表单弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
-      <el-form ref="roleFormRef" :model="roleForm" label-width="100px">
-        <el-form-item
-          label="角色编码"
-          prop="code"
-          :rules="[{ required: true, message: '请输入角色编码', trigger: 'blur' }]"
-        >
-          <el-input v-model="roleForm.code" placeholder="请输入角色编码" />
-        </el-form-item>
-        <el-form-item
-          label="角色名称"
-          prop="name"
-          :rules="[{ required: true, message: '请输入角色名称', trigger: 'blur' }]"
-        >
-          <el-input v-model="roleForm.name" placeholder="请输入角色名称" />
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input
-            v-model="roleForm.description"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入角色描述"
-          />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="roleForm.status">
-            <el-radio :value="1">启用</el-radio>
-            <el-radio :value="0">禁用</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave(roleFormRef)">确定</el-button>
-      </template>
-    </el-dialog>
+    <RoleFormDialog ref="roleFormDialogRef" @success="loadRoleList" />
 
     <!-- 权限配置弹窗 -->
-    <el-dialog v-model="permissionDialogVisible" title="权限配置" width="1200px">
-      <el-splitter style="height: 600px">
-        <el-splitter-panel :size="splitSize * 100 + '%'">
-          <div class="permission-tree">
-            <div class="tree-header">菜单权限</div>
-            <el-tree
-              ref="menuTreeRef"
-              :data="menuTree"
-              :props="{ children: 'children', label: 'title' }"
-              show-checkbox
-              node-key="id"
-              default-expand-all
-              @check="handleMenuTreeCheck"
-            />
-          </div>
-        </el-splitter-panel>
-        <el-splitter-panel>
-          <div class="permission-list">
-            <div class="list-header">按钮权限</div>
-            <div class="checkbox-group">
-              <el-checkbox-group v-model="permissionForm.buttonPermissionCodes">
-                <el-checkbox
-                  v-for="perm in allButtonPermissions"
-                  :key="perm.code"
-                  :label="perm.code"
-                  style="display: block; margin-bottom: 10px"
-                >
-                  {{ perm.name }} ({{ perm.code }})
-                </el-checkbox>
-              </el-checkbox-group>
-            </div>
-            <div class="list-header" style="margin-top: 30px">API权限</div>
-            <div class="checkbox-group">
-              <el-checkbox-group v-model="permissionForm.apiPermissionCodes">
-                <el-checkbox
-                  v-for="perm in allApiPermissions"
-                  :key="perm.code"
-                  :label="perm.code"
-                  style="display: block; margin-bottom: 10px"
-                >
-                  [{{ perm.method }}] {{ perm.name }} ({{ perm.code }})
-                </el-checkbox>
-              </el-checkbox-group>
-            </div>
-          </div>
-        </el-splitter-panel>
-      </el-splitter>
-
-      <template #footer>
-        <el-button @click="permissionDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSavePermissions">确定</el-button>
-      </template>
-    </el-dialog>
+    <RolePermissionDialog ref="rolePermissionDialogRef" @success="loadRoleList" />
   </div>
 </template>
 
 <style lang="scss" scoped>
 .role-page {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: 20px;
+  overflow: hidden;
 
   .search-card,
-  .toolbar-card,
-  .table-card {
+  .toolbar-card {
+    display: block;
+    flex-shrink: 0;
     margin-bottom: 20px;
+  }
+
+  .table-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+
+    // stylelint-disable-next-line selector-class-pattern
+    :deep(.el-card__body) {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+  }
+
+  // stylelint-disable-next-line selector-class-pattern
+  :deep(.el-table) {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  // stylelint-disable-next-line selector-class-pattern
+  :deep(.el-table__body-wrapper) {
+    max-height: 100%;
+    overflow-y: auto;
   }
 
   .pagination {
     display: flex;
+    flex-shrink: 0;
     justify-content: flex-end;
     margin-top: 20px;
-  }
-
-  .permission-tree {
-    height: 100%;
-    padding: 20px;
-    overflow-y: auto;
-
-    .tree-header {
-      margin-bottom: 15px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-  }
-
-  .permission-list {
-    height: 100%;
-    padding: 20px;
-    overflow-y: auto;
-
-    .list-header {
-      margin-bottom: 15px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .checkbox-group {
-      max-height: 250px;
-      overflow-y: auto;
-    }
   }
 }
 </style>
