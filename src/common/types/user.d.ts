@@ -7,15 +7,18 @@ export interface User {
   phone: string
   roleIds: number[] // 角色ID数组（多对多）
   status: number // 0-禁用，1-启用
+  isSystem: boolean // 是否系统用户
   createTime: string
   updateTime: string
 }
 
 // 创建用户
-export type CreateUser = Omit<User, 'id' | 'createTime' | 'updateTime'> & { password: string }
+export type CreateUser = Omit<User, 'id' | 'isSystem' | 'createTime' | 'updateTime'> & {
+  password: string
+}
 
 // 更新用户
-export type UpdateUser = Partial<Omit<User, 'id' | 'createTime' | 'updateTime'>>
+export type UpdateUser = Partial<Omit<User, 'id' | 'isSystem' | 'createTime' | 'updateTime'>>
 
 // 用户列表查询参数
 export interface UserQueryParams {
