@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, Edit, Plus, Refresh, Search, Key } from '@element-plus/icons-vue'
+import { Delete, Edit, Plus, Refresh, Search, Key, Connection } from '@element-plus/icons-vue'
 import { getRoleList, deleteRole, updateRole } from '@/common/api/role'
 import RoleFormDialog from './role-form-dialog.vue'
 import RolePermissionDialog from './role-permission-dialog.vue'
@@ -17,7 +17,6 @@ const { initContext } = useProvide()
 
 // 搜索表单
 const searchForm = reactive<RoleQueryParams>({
-  code: '',
   name: '',
   status: undefined,
   currentPage: 1,
@@ -37,7 +36,6 @@ const loadRoleList = async () => {
   loading.value = true
   try {
     const params: RoleQueryParams = {
-      code: searchForm.code || undefined,
       name: searchForm.name || undefined,
       status: searchForm.status,
       currentPage: pagination.currentPage,
@@ -61,7 +59,6 @@ const handleSearch = () => {
 
 // 重置搜索
 const handleReset = () => {
-  searchForm.code = ''
   searchForm.name = ''
   searchForm.status = undefined
   handleSearch()
@@ -108,8 +105,8 @@ const handleStatusChange = async (row: Role) => {
 }
 
 // 打开权限配置弹窗
-const handlePermissionConfig = (row: Role) => {
-  rolePermissionDialogRef.value?.open(row.id)
+const handlePermissionConfig = (row: Role, type: 'menu' | 'api') => {
+  rolePermissionDialogRef.value?.open(row.id, type)
 }
 
 // 分页
@@ -138,14 +135,6 @@ init()
     <!-- 搜索栏 -->
     <el-card class="search-card">
       <el-form :model="searchForm" inline>
-        <el-form-item label="角色编码">
-          <el-input
-            v-model="searchForm.code"
-            placeholder="请输入角色编码"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
         <el-form-item label="角色名称">
           <el-input
             v-model="searchForm.name"
@@ -180,11 +169,9 @@ init()
     <!-- 表格 -->
     <el-card class="table-card">
       <el-table v-loading="loading" :data="tableData" stripe>
-        <el-table-column type="index" label="序号" width="80" align="center" />
-        <el-table-column prop="code" label="角色编码" min-width="150" show-overflow-tooltip />
-        <el-table-column prop="name" label="角色名称" min-width="150" show-overflow-tooltip />
-        <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column type="index" label="序号" min-width="40" align="center" />
+        <el-table-column prop="name" label="角色名称" min-width="100" show-overflow-tooltip />
+        <el-table-column prop="status" label="状态" min-width="100" align="center">
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
@@ -194,12 +181,20 @@ init()
             />
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" min-width="170" show-overflow-tooltip />
-        <el-table-column label="操作" width="200" fixed="right" align="center">
+        <el-table-column prop="createTime" label="创建时间" min-width="100" show-overflow-tooltip />
+        <el-table-column label="操作" min-width="160" fixed="right" align="center">
           <template #default="{ row }">
             <el-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</el-button>
-            <el-button type="success" link :icon="Key" @click="handlePermissionConfig(row)">
+            <el-button type="success" link :icon="Key" @click="handlePermissionConfig(row, 'menu')">
               菜单权限
+            </el-button>
+            <el-button
+              type="warning"
+              link
+              :icon="Connection"
+              @click="handlePermissionConfig(row, 'api')"
+            >
+              API权限
             </el-button>
             <el-button type="danger" link :icon="Delete" @click="handleDelete(row)">删除</el-button>
           </template>

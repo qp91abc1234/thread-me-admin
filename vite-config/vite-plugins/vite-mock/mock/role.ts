@@ -6,12 +6,12 @@ const roleList = Mock.mock({
   'list|5-8': [
     {
       'id|+1': 1,
-      code: () => `role_${Mock.Random.word(3, 8)}`,
       name: () =>
         `${Mock.Random.pick(['管理员', '编辑', '查看', '运营', '测试'])}${Mock.Random.integer(1, 5)}`,
-      description: '@csentence(10, 30)',
       'status|1': [0, 1],
-      createTime: '@datetime("yyyy-MM-dd HH:mm:ss")'
+      isSystem: false,
+      createTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
+      updateTime: '@datetime("yyyy-MM-dd HH:mm:ss")'
     }
   ]
 }).list
@@ -20,20 +20,20 @@ const roleList = Mock.mock({
 if (roleList.length > 0) {
   roleList[0] = {
     id: 1,
-    code: 'admin',
     name: '超级管理员',
-    description: '拥有所有权限的超级管理员角色',
     status: 1,
-    createTime: '2024-01-01 10:00:00'
+    isSystem: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
   }
   if (roleList.length > 1) {
     roleList[1] = {
       id: 2,
-      code: 'user',
       name: '普通用户',
-      description: '普通用户角色',
       status: 1,
-      createTime: '2024-01-01 10:00:00'
+      isSystem: false,
+      createTime: '2024-01-01 10:00:00',
+      updateTime: '2024-01-01 10:00:00'
     }
   }
 }
@@ -41,7 +41,7 @@ if (roleList.length > 0) {
 // 角色权限关联数据
 const rolePermissions: Record<
   number,
-  { menuIds: number[]; buttonPermissionIds: number[]; apiPermissionIds: number[] }
+  { menuIds: number[]; apiPermissionIds: number[] }
 > = {}
 
 export default [
@@ -50,13 +50,10 @@ export default [
     url: '/api/role/list',
     method: 'post',
     response: ({ body }: { body: any }) => {
-      const { code, name, status, currentPage = 1, pageSize = 10 } = body
+      const { name, status, currentPage = 1, pageSize = 10 } = body
 
       // 过滤数据
       let filteredList = [...roleList]
-      if (code) {
-        filteredList = filteredList.filter((role) => role.code.includes(code))
-      }
       if (name) {
         filteredList = filteredList.filter((role) => role.name.includes(name))
       }
@@ -103,23 +100,23 @@ export default [
     url: '/api/role',
     method: 'post',
     response: ({ body }: { body: any }) => {
-      const { code, name, description, status } = body
+      const { name, status } = body
 
-      // 检查角色编码是否已存在
-      if (roleList.some((r) => r.code === code)) {
+      // 检查角色名称是否已存在
+      if (roleList.some((r) => r.name === name)) {
         return {
-          message: '角色编码已存在',
+          message: '角色名称已存在',
           data: null
         }
       }
 
       const newRole = {
         id: roleList.length > 0 ? Math.max(...roleList.map((r) => r.id)) + 1 : 1,
-        code,
         name,
-        description: description || '',
         status: status ?? 1,
-        createTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+        isSystem: false,
+        createTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
+        updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
       }
 
       roleList.push(newRole)
@@ -143,10 +140,10 @@ export default [
         }
       }
 
-      // 检查角色编码是否已被其他角色使用
-      if (body.code && roleList.some((r) => r.code === body.code && r.id !== id)) {
+      // 检查角色名称是否已被其他角色使用
+      if (body.name && roleList.some((r) => r.name === body.name && r.id !== id)) {
         return {
-          message: '角色编码已存在',
+          message: '角色名称已存在',
           data: null
         }
       }
@@ -156,6 +153,10 @@ export default [
         ...body,
         id,
         updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+      }
+      // 确保 isSystem 字段存在
+      if (roleList[index].isSystem === undefined) {
+        roleList[index].isSystem = false
       }
 
       return {
@@ -203,7 +204,6 @@ export default [
       const id = parseInt(query.id)
       const permissions = rolePermissions[id] || {
         menuIds: [],
-        buttonPermissionIds: [],
         apiPermissionIds: []
       }
       return {
@@ -227,7 +227,6 @@ export default [
 
       rolePermissions[id] = {
         menuIds: body.menuIds || [],
-        buttonPermissionIds: body.buttonPermissionIds || [],
         apiPermissionIds: body.apiPermissionIds || []
       }
 

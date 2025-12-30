@@ -7,12 +7,15 @@ const userList = Mock.mock({
     {
       'id|+1': 1,
       username: '@word(5,10)',
+      password: '@word(10,20)', // 加密后的密码
       realName: '@cname',
       email: '@email',
       phone: /^1[3-9]\d{9}$/,
       'roleIds|1-3': [() => Mock.Random.integer(1, 5)],
       'status|1': [0, 1],
-      createTime: '@datetime("yyyy-MM-dd HH:mm:ss")'
+      isSystem: false,
+      createTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
+      updateTime: '@datetime("yyyy-MM-dd HH:mm:ss")'
     }
   ]
 }).list
@@ -22,12 +25,15 @@ if (userList.length > 0) {
   userList[0] = {
     id: 1,
     username: 'admin',
+    password: 'hashed_password_here', // 实际应该是加密后的密码
     realName: '系统管理员',
     email: 'admin@example.com',
     phone: '13800138000',
     roleIds: [1], // 超级管理员角色
     status: 1,
-    createTime: '2024-01-01 10:00:00'
+    isSystem: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
   }
 }
 
@@ -100,12 +106,15 @@ export default [
       const newUser = {
         id: userList.length > 0 ? Math.max(...userList.map((u) => u.id)) + 1 : 1,
         username,
+        password: body.password || 'hashed_password_here', // 实际应该加密
         realName,
         email,
         phone,
         roleIds: roleIds || [],
         status: status ?? 1,
-        createTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+        isSystem: false,
+        createTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
+        updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
       }
 
       userList.push(newUser)
@@ -142,6 +151,10 @@ export default [
         ...body,
         id,
         updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+      }
+      // 确保 isSystem 字段存在
+      if (userList[index].isSystem === undefined) {
+        userList[index].isSystem = false
       }
 
       return {

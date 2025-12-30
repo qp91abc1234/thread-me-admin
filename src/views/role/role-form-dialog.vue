@@ -15,9 +15,7 @@ const roleFormRef = ref<FormInstance>()
 // 角色表单
 const roleForm = reactive({
   id: 0,
-  code: '',
   name: '',
-  description: '',
   status: 1
 })
 
@@ -28,9 +26,7 @@ const resetForm = (role?: Role | null) => {
   } else {
     Object.assign(roleForm, {
       id: 0,
-      code: '',
       name: '',
-      description: '',
       status: 1
     })
   }
@@ -90,26 +86,11 @@ defineExpose({
   <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
     <el-form ref="roleFormRef" :model="roleForm" label-width="100px">
       <el-form-item
-        label="角色编码"
-        prop="code"
-        :rules="[{ required: true, message: '请输入角色编码', trigger: 'blur' }]"
-      >
-        <el-input v-model="roleForm.code" placeholder="请输入角色编码" />
-      </el-form-item>
-      <el-form-item
         label="角色名称"
         prop="name"
         :rules="[{ required: true, message: '请输入角色名称', trigger: 'blur' }]"
       >
         <el-input v-model="roleForm.name" placeholder="请输入角色名称" />
-      </el-form-item>
-      <el-form-item label="描述" prop="description">
-        <el-input
-          v-model="roleForm.description"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入角色描述"
-        />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="roleForm.status">
