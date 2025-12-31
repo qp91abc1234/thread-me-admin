@@ -3,7 +3,7 @@ import { ref, reactive } from 'vue'
 import { ElMessage, type FormInstance } from 'element-plus'
 import { createUser, updateUser } from '@/common/api/user'
 import { useInject } from './user-context'
-import type { User } from '@/common/types/user'
+import type { CreateUser, User } from '@/common/types/user'
 
 const emit = defineEmits<{
   (e: 'success'): void
@@ -18,23 +18,23 @@ const { roleOptions } = useInject()
 
 // 用户表单
 const userForm = reactive({
-  id: 0,
+  id: undefined as number | undefined,
   username: '',
   realName: '',
   email: '',
   phone: '',
   roleIds: [],
   status: 1,
-  password: ''
+  password: undefined as string | undefined
 })
 
 // 重置表单
-const resetForm = (user?: User | null) => {
+const resetForm = (user?: User) => {
   if (user) {
     Object.assign(userForm, user)
   } else {
     Object.assign(userForm, {
-      id: 0,
+      id: undefined,
       username: '',
       realName: '',
       email: '',
@@ -73,7 +73,7 @@ const handleSave = async (formEl: FormInstance | undefined) => {
           ElMessage.success('编辑成功')
         } else {
           // 新增
-          await createUser(userForm)
+          await createUser(userForm as CreateUser)
           ElMessage.success('新增成功')
         }
         dialogVisible.value = false

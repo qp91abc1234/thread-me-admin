@@ -93,25 +93,20 @@ const handleButtonPermissionSizeChange = (size: number) => {
 watch(
   () => currentNode.value,
   async (node) => {
-    if (node) {
-      // 加载表单数据
-      resetForm(node)
+    if (!node) return
+    // 加载表单数据
+    resetForm(node)
 
-      // 加载按钮权限（只有菜单项才有按钮权限）
-      if (menuForm.type === 1) {
-        await loadButtonPermissions(node.id)
-      } else {
-        buttonPermissionTable.value = []
-      }
-      // 重置搜索和分页
-      buttonPermissionSearch.value = ''
-      buttonPermissionPagination.currentPage = 1
-      buttonPermissionPagination.pageSize = 10
+    // 加载按钮权限（只有菜单项才有按钮权限）
+    if (menuForm.type === 1) {
+      await loadButtonPermissions(node.id)
     } else {
-      // 重置表单
-      resetForm()
       buttonPermissionTable.value = []
     }
+    // 重置搜索和分页
+    buttonPermissionSearch.value = ''
+    buttonPermissionPagination.currentPage = 1
+    buttonPermissionPagination.pageSize = 10
   },
   { immediate: true }
 )

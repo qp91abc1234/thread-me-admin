@@ -17,20 +17,7 @@ export const { useProvide, useInject } = useContext('MenuContext', () => {
     loading.value = true
     try {
       const res = await getMenuTree()
-      // 兼容处理：将 name 映射到 title 用于显示
-      const processTree = (nodes: MenuItem[]): MenuItem[] => {
-        return nodes.map((node) => ({
-          ...node,
-          title: node.name, // 兼容旧字段
-          children: node.children ? processTree(node.children) : undefined
-        }))
-      }
-      menuTree.value = processTree(res.tree)
-
-      // 默认选中第一个节点
-      if (menuTree.value.length > 0 && !currentNode.value) {
-        setCurrentNode(menuTree.value[0])
-      }
+      menuTree.value = res.tree
     } catch (error) {
       console.error('加载菜单树失败:', error)
     } finally {
@@ -45,6 +32,10 @@ export const { useProvide, useInject } = useContext('MenuContext', () => {
 
   const initContext = async () => {
     await loadMenuTree()
+    // 默认选中第一个节点
+    if (menuTree.value.length > 0 && !currentNode.value) {
+      setCurrentNode(menuTree.value[0])
+    }
   }
 
   return {

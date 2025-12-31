@@ -16,8 +16,8 @@ const editingItem = ref<ButtonPermission>()
 const loading = ref(false)
 
 // 按钮权限表单
-const form = reactive<ButtonPermission>({
-  id: 0,
+const form = reactive({
+  id: undefined as number | undefined,
   code: '',
   name: '',
   status: 1,
@@ -30,7 +30,7 @@ const resetForm = (menuId: number, data?: ButtonPermission) => {
     Object.assign(form, data)
   } else {
     Object.assign(form, {
-      id: 0,
+      id: undefined,
       code: '',
       name: '',
       status: 1,

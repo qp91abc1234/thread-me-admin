@@ -14,7 +14,7 @@ const roleFormRef = ref<FormInstance>()
 
 // 角色表单
 const roleForm = reactive({
-  id: 0,
+  id: undefined as number | undefined,
   name: '',
   status: 1
 })
@@ -25,7 +25,7 @@ const resetForm = (role?: Role | null) => {
     Object.assign(roleForm, role)
   } else {
     Object.assign(roleForm, {
-      id: 0,
+      id: undefined,
       name: '',
       status: 1
     })

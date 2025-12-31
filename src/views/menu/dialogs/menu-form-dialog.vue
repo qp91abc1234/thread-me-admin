@@ -14,7 +14,6 @@ const menuFormRef = ref<FormInstance>()
 
 // 菜单表单
 const menuForm = reactive({
-  id: 0,
   path: '',
   name: '',
   icon: '',
@@ -29,7 +28,6 @@ const menuForm = reactive({
 // 重置表单
 const resetForm = () => {
   Object.assign(menuForm, {
-    id: 0,
     path: '',
     name: '',
     icon: '',
