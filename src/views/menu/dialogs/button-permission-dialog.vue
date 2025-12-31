@@ -2,34 +2,30 @@
 import { ref, reactive } from 'vue'
 import { type FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import type { ButtonPermission, MenuItem } from '@/common/types/permission'
-import { updateMenu, createButtonPermission, updateButtonPermission } from '@/common/api/menu'
+import type { ButtonPermission } from '@/common/types/permission'
+import { createButtonPermission, updateButtonPermission } from '@/common/api/permission'
 
-const props = defineProps<{
-  menuId: number
-  tableData: ButtonPermission[]
+const emit = defineEmits<{
+  (e: 'success'): void
 }>()
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增按钮权限')
 const formRef = ref<FormInstance>()
-const editingItem = ref<ButtonPermission | null>(null)
+const editingItem = ref<ButtonPermission>()
 const loading = ref(false)
-
-// 用于更新父组件数据的引用
-let buttonPermissionTableRef: { value: ButtonPermission[] } | null = null
-let currentNodeRef: { value: MenuItem | null } | null = null
 
 // 按钮权限表单
 const form = reactive<ButtonPermission>({
   id: 0,
   code: '',
   name: '',
-  hidden: false
+  status: 1,
+  menuId: 0
 })
 
 // 重置表单
-const resetForm = (data?: ButtonPermission | null) => {
+const resetForm = (menuId: number, data?: ButtonPermission) => {
   if (data) {
     Object.assign(form, data)
   } else {
@@ -37,29 +33,24 @@ const resetForm = (data?: ButtonPermission | null) => {
       id: 0,
       code: '',
       name: '',
-      hidden: false
+      status: 1,
+      menuId: menuId
     })
   }
 }
 
 // 打开对话框
-const open = (
-  data?: ButtonPermission | null,
-  buttonPermissionTable?: { value: ButtonPermission[] },
-  currentNode?: { value: MenuItem | null }
-) => {
-  editingItem.value = data || null
-  buttonPermissionTableRef = buttonPermissionTable || null
-  currentNodeRef = currentNode || null
+const open = (menuId: number, data?: ButtonPermission) => {
+  editingItem.value = data
 
   if (data) {
     // 编辑模式
     dialogTitle.value = '编辑按钮权限'
-    resetForm(data)
+    resetForm(menuId, data)
   } else {
     // 新增模式
     dialogTitle.value = '新增按钮权限'
-    resetForm()
+    resetForm(menuId)
   }
   dialogVisible.value = true
 }
@@ -72,56 +63,18 @@ const handleSave = async (formEl: FormInstance | undefined) => {
     if (valid) {
       loading.value = true
       try {
-        let savedButtonPermission: ButtonPermission
-
         // 第一步：创建或更新按钮权限实体
         if (editingItem.value) {
           // 编辑模式：更新按钮权限实体（ID 不变，菜单关联关系不变）
-          savedButtonPermission = await updateButtonPermission(editingItem.value.id, {
-            code: form.code,
-            name: form.name,
-            hidden: form.hidden
-          })
+          await updateButtonPermission(form.menuId, form)
         } else {
-          // 新增模式：创建按钮权限实体
-          savedButtonPermission = await createButtonPermission({
-            code: form.code,
-            name: form.name,
-            hidden: form.hidden
-          })
-        }
-
-        // 第二步：更新菜单的按钮权限关联关系（仅新增模式需要）
-        if (editingItem.value) {
-          // 编辑模式：直接更新表格中对应项的数据，无需重新请求
-          if (buttonPermissionTableRef) {
-            const index = buttonPermissionTableRef.value.findIndex(
-              (item) => item.id === savedButtonPermission.id
-            )
-            if (index > -1) {
-              buttonPermissionTableRef.value[index] = savedButtonPermission
-            }
-          }
-        } else {
-          // 新增模式：将新创建的按钮权限 ID 添加到菜单关联中
-          const currentIds = props.tableData.map((item) => item.id)
-          const newIds = [...currentIds, savedButtonPermission.id]
-
-          await updateMenu(props.menuId, {
-            buttonPermissionIds: newIds
-          })
-
-          // 直接将新创建的按钮权限添加到列表中，无需重新请求
-          if (buttonPermissionTableRef) {
-            buttonPermissionTableRef.value = [...props.tableData, savedButtonPermission]
-          }
-          if (currentNodeRef?.value) {
-            currentNodeRef.value.buttonPermissionIds = newIds
-          }
+          // 新增模式：创建按钮权限实体（需要传递 menuId）
+          await createButtonPermission(form)
         }
 
         ElMessage.success(editingItem.value ? '按钮权限更新成功' : '按钮权限添加成功')
         dialogVisible.value = false
+        emit('success')
       } catch (error: any) {
         ElMessage.error(error.message || '操作失败')
       } finally {
@@ -159,8 +112,8 @@ defineExpose({
       >
         <el-input v-model="form.name" placeholder="如：新增用户" />
       </el-form-item>
-      <el-form-item label="是否隐藏">
-        <el-switch v-model="form.hidden" />
+      <el-form-item label="是否启用">
+        <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
       </el-form-item>
     </el-form>
 

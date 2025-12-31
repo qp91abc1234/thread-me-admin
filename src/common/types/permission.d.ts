@@ -18,6 +18,7 @@ export interface ButtonPermission {
   code: string
   name: string
   status: number
+  menuId: number
 }
 
 // 按钮权限列表

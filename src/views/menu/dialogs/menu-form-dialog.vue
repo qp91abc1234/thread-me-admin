@@ -13,14 +13,14 @@ const dialogTitle = ref('')
 const menuFormRef = ref<FormInstance>()
 
 // 菜单表单
-const menuForm = reactive<Partial<MenuItem>>({
+const menuForm = reactive({
   id: 0,
   path: '',
   name: '',
   icon: '',
   compPath: '',
   type: 1,
-  parentId: null,
+  parentId: null as number | null,
   sort: 0,
   visible: true,
   status: 1
