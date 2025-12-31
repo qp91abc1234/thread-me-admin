@@ -13,8 +13,8 @@ import type {
  * 获取菜单树
  * @returns 菜单树响应
  */
-export function getMenuTree(): Promise<MenuTreeResponse> {
-  return requestGet<MenuTreeResponse>('/menu/tree').then((res) => res.data)
+export function getMenuTree(status?: number): Promise<MenuTreeResponse> {
+  return requestGet<MenuTreeResponse>('/menu/tree', { status }).then((res) => res.data)
 }
 
 /**

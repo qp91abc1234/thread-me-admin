@@ -15,7 +15,7 @@ export const { useProvide, useInject } = useContext('RoleContext', () => {
   // 加载菜单树
   const loadMenuTree = async () => {
     try {
-      const res = await getMenuTree()
+      const res = await getMenuTree(1)
       menuTree.value = res.tree
     } catch (error) {
       console.error('加载菜单树失败:', error)

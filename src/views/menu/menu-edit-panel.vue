@@ -302,10 +302,10 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
             <el-table-column type="index" label="序号" width="60" align="center" />
             <el-table-column prop="code" label="权限Code" min-width="150" show-overflow-tooltip />
             <el-table-column prop="name" label="权限名称" min-width="120" show-overflow-tooltip />
-            <el-table-column prop="hidden" label="是否隐藏" width="100" align="center">
+            <el-table-column prop="status" label="是否启用" width="100" align="center">
               <template #default="{ row }">
-                <el-tag :type="row.hidden ? 'danger' : 'success'">
-                  {{ row.hidden ? '是' : '否' }}
+                <el-tag :type="row.status === 1 ? 'success' : 'danger'">
+                  {{ row.status === 1 ? '是' : '否' }}
                 </el-tag>
               </template>
             </el-table-column>
