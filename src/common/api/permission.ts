@@ -4,7 +4,9 @@ import type {
   MenuTreeResponse,
   MenuSortParams,
   ApiPermission,
-  ButtonPermission
+  ButtonPermission,
+  CreateMenuItem,
+  UpdateMenuItem
 } from '@/common/types/permission'
 
 /**
@@ -29,7 +31,7 @@ export function getMenuDetail(id: number): Promise<MenuItem> {
  * @param menu 菜单信息
  * @returns 菜单信息
  */
-export function createMenu(menu: Partial<MenuItem>): Promise<MenuItem> {
+export function createMenu(menu: CreateMenuItem): Promise<MenuItem> {
   return requestPost<MenuItem>('/menu', menu).then((res) => res.data)
 }
 
@@ -39,7 +41,7 @@ export function createMenu(menu: Partial<MenuItem>): Promise<MenuItem> {
  * @param menu 菜单信息
  * @returns 菜单信息
  */
-export function updateMenu(id: number, menu: Partial<MenuItem>): Promise<MenuItem> {
+export function updateMenu(id: number, menu: UpdateMenuItem): Promise<MenuItem> {
   return reqPut<MenuItem>(`/menu/${id}`, menu).then((res) => res.data)
 }
 

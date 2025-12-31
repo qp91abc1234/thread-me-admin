@@ -60,6 +60,12 @@ export interface MenuItem {
   updateTime: string
 }
 
+export type CreateMenuItem = Omit<MenuItem, 'id' | 'children' | 'createTime' | 'updateTime'>
+
+export type UpdateMenuItem = Partial<
+  Omit<MenuItem, 'id' | 'children' | 'createTime' | 'updateTime'>
+>
+
 // 菜单树响应
 export interface MenuTreeResponse {
   tree: MenuItem[]

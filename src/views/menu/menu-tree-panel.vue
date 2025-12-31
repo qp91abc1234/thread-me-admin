@@ -99,7 +99,7 @@ const handleDelete = async (node: MenuItem) => {
     <el-tree
       v-loading="loading"
       :data="menuTree"
-      :props="{ children: 'children', label: 'title' }"
+      :props="{ children: 'children', label: 'name' }"
       node-key="id"
       default-expand-all
       draggable
