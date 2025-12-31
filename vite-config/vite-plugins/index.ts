@@ -70,7 +70,7 @@ export function getPlugins(viteEnv: Env.ImportMeta, isBuild: boolean): PluginOpt
       )
     }
 
-    plugins.push(setupMockPlugin(isBuild))
+    plugins.push(setupMockPlugin(false))
   }
 
   if (isBuild) {
