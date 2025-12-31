@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { ElMessage, type FormInstance } from 'element-plus'
-import { createMenu, updateMenu } from '@/common/api/menu'
+import { createMenu } from '@/common/api/permission'
 import type { MenuItem } from '@/common/types/permission'
 
 const emit = defineEmits<{
@@ -9,56 +9,51 @@ const emit = defineEmits<{
 }>()
 
 const dialogVisible = ref(false)
-const dialogTitle = ref('新增菜单')
+const dialogTitle = ref('')
 const menuFormRef = ref<FormInstance>()
 
 // 菜单表单
 const menuForm = reactive<Partial<MenuItem>>({
   id: 0,
   path: '',
-  title: '',
+  name: '',
   icon: '',
   compPath: '',
-  parentId: undefined,
+  type: 1,
+  parentId: null,
   sort: 0,
+  visible: true,
   status: 1
 })
 
 // 重置表单
-const resetForm = (menu?: MenuItem | null) => {
-  if (menu) {
-    Object.assign(menuForm, {
-      ...menu,
-      buttonPermissionIds: menu.buttonPermissionIds || [],
-      apiPermissionIds: menu.apiPermissionIds || []
-    })
-  } else {
-    Object.assign(menuForm, {
-      id: 0,
-      path: '',
-      title: '',
-      icon: '',
-      compPath: '',
-      parentId: undefined,
-      sort: 0,
-      status: 1
-    })
-  }
+const resetForm = () => {
+  Object.assign(menuForm, {
+    id: 0,
+    path: '',
+    name: '',
+    icon: '',
+    compPath: '',
+    type: 1,
+    parentId: null,
+    sort: 0,
+    visible: true,
+    status: 1
+  })
 }
 
 // 打开对话框
-const open = (menu?: MenuItem | null, parentNode?: MenuItem | null) => {
-  if (menu) {
-    // 编辑模式
-    dialogTitle.value = '编辑菜单'
-    resetForm(menu)
+const open = (parentNode?: MenuItem | null, type: 'directory' | 'menu' = 'menu') => {
+  dialogTitle.value = type === 'directory' ? '新建目录' : '新建菜单项'
+  resetForm()
+  if (parentNode) {
+    menuForm.parentId = parentNode.id
+  }
+  // 目录不需要组件路径
+  if (type === 'directory') {
+    menuForm.type = 0
   } else {
-    // 新增模式
-    dialogTitle.value = '新增菜单'
-    resetForm()
-    if (parentNode) {
-      menuForm.parentId = parentNode.id
-    }
+    menuForm.type = 1
   }
   dialogVisible.value = true
 }
@@ -70,15 +65,8 @@ const handleSave = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid) => {
     if (valid) {
       try {
-        if (menuForm.id) {
-          // 编辑
-          await updateMenu(menuForm.id, menuForm)
-          ElMessage.success('编辑成功')
-        } else {
-          // 新增
-          await createMenu(menuForm)
-          ElMessage.success('新增成功')
-        }
+        await createMenu(menuForm)
+        ElMessage.success('新增成功')
         dialogVisible.value = false
         emit('success')
       } catch (error: any) {
@@ -111,15 +99,21 @@ defineExpose({
       </el-form-item>
       <el-form-item
         label="菜单名称"
-        prop="title"
+        prop="name"
         :rules="[{ required: true, message: '请输入菜单名称', trigger: 'blur' }]"
       >
-        <el-input v-model="menuForm.title" placeholder="请输入菜单名称" />
+        <el-input v-model="menuForm.name" placeholder="请输入菜单名称" />
       </el-form-item>
       <el-form-item label="图标">
         <el-input v-model="menuForm.icon" placeholder="请输入图标名称，如：User" />
       </el-form-item>
-      <el-form-item label="组件路径">
+      <!-- 组件路径：新建菜单项时显示且必填，新建目录时不显示，编辑时根据类型显示 -->
+      <el-form-item
+        v-if="menuForm.type === 1"
+        label="组件路径"
+        prop="compPath"
+        :rules="[{ required: true, message: '请输入组件路径', trigger: 'blur' }]"
+      >
         <el-input
           v-model="menuForm.compPath"
           placeholder="请输入组件路径，如：/src/views/user/user.vue"
@@ -127,6 +121,9 @@ defineExpose({
       </el-form-item>
       <el-form-item label="排序">
         <el-input-number v-model="menuForm.sort" :min="0" style="width: 100%" />
+      </el-form-item>
+      <el-form-item label="是否显示">
+        <el-switch v-model="menuForm.visible" :active-value="true" :inactive-value="false" />
       </el-form-item>
       <el-form-item label="状态">
         <el-radio-group v-model="menuForm.status">
@@ -142,3 +139,13 @@ defineExpose({
     </template>
   </el-dialog>
 </template>
+
+<style lang="scss" scoped>
+.form-tip {
+  margin-top: 4px;
+}
+
+.dialog-footer-tip {
+  margin-bottom: 10px;
+}
+</style>

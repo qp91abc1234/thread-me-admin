@@ -5,92 +5,209 @@ import Mock from 'mockjs'
 let menuList: any[] = [
   {
     id: 1,
+    name: '首页',
     path: 'home',
-    title: '首页',
     icon: 'Sunny',
     compPath: '/src/views/home/home.vue',
+    type: 1,
     parentId: undefined,
     sort: 1,
+    visible: true,
     status: 1,
-    buttonPermissionIds: [],
-    apiPermissionIds: [],
-    createTime: '2024-01-01 10:00:00'
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
   },
   {
     id: 2,
+    name: '权限管理',
     path: 'rbac',
-    title: '权限管理',
     icon: 'Lock',
+    type: 0,
     parentId: undefined,
     sort: 2,
+    visible: true,
     status: 1,
-    buttonPermissionIds: [],
-    apiPermissionIds: [],
     createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
     children: [
       {
         id: 3,
+        name: '用户管理',
         path: 'user',
-        title: '用户管理',
-        compPath: '/src/views/rbac/user/user.vue',
+        compPath: '/src/views/user/user.vue',
+        type: 1,
         parentId: 2,
         sort: 1,
+        visible: true,
         status: 1,
-        buttonPermissionIds: [1, 2, 3, 4], // user:add, user:edit, user:delete, user:view
-        apiPermissionIds: [1, 3, 4, 5], // GET:/api/user/list, POST:/api/user, PUT:/api/user/:id, DELETE:/api/user/:id
-        createTime: '2024-01-01 10:00:00'
+        createTime: '2024-01-01 10:00:00',
+        updateTime: '2024-01-01 10:00:00'
       },
       {
         id: 4,
+        name: '角色管理',
         path: 'role',
-        title: '角色管理',
-        compPath: '/src/views/rbac/role/role.vue',
+        compPath: '/src/views/role/role.vue',
+        type: 1,
         parentId: 2,
         sort: 2,
+        visible: true,
         status: 1,
-        buttonPermissionIds: [5, 6, 7, 8, 9], // role:add, role:edit, role:delete, role:view, role:permission
-        apiPermissionIds: [6, 8, 9, 10], // GET:/api/role/list, POST:/api/role, PUT:/api/role/:id, DELETE:/api/role/:id
-        createTime: '2024-01-01 10:00:00'
+        createTime: '2024-01-01 10:00:00',
+        updateTime: '2024-01-01 10:00:00'
       },
       {
         id: 5,
+        name: '菜单管理',
         path: 'menu',
-        title: '菜单管理',
-        compPath: '/src/views/rbac/menu/menu.vue',
+        compPath: '/src/views/menu/menu.vue',
+        type: 1,
         parentId: 2,
         sort: 3,
+        visible: true,
         status: 1,
-        buttonPermissionIds: [10, 11, 12, 13], // menu:add, menu:edit, menu:delete, menu:view
-        apiPermissionIds: [11, 13, 14, 15], // GET:/api/menu/tree, POST:/api/menu, PUT:/api/menu/:id, DELETE:/api/menu/:id
-        createTime: '2024-01-01 10:00:00'
+        createTime: '2024-01-01 10:00:00',
+        updateTime: '2024-01-01 10:00:00'
       }
     ]
   },
   {
     id: 6,
+    name: '系统管理',
     path: 'system',
-    title: '系统管理',
     icon: 'Setting',
+    type: 0,
     parentId: undefined,
     sort: 3,
+    visible: true,
     status: 1,
-    buttonPermissionIds: [],
-    apiPermissionIds: [],
     createTime: '2024-01-01 10:00:00',
-    children: [
-      {
-        id: 7,
-        path: 'user',
-        title: '用户管理',
-        compPath: '/src/views/user/user.vue',
-        parentId: 6,
-        sort: 1,
-        status: 1,
-        buttonPermissionCodes: [],
-        apiPermissionCodes: [],
-        createTime: '2024-01-01 10:00:00'
-      }
-    ]
+    updateTime: '2024-01-01 10:00:00',
+    children: []
+  }
+]
+
+// 模拟按钮权限数据存储（根据 schema.prisma，Button 表有 menuId 字段）
+const buttonPermissionList: any[] = [
+  // 用户管理菜单（id: 3）的按钮权限
+  {
+    id: 1,
+    menuId: 3,
+    code: 'user:add',
+    name: '新增用户',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 2,
+    menuId: 3,
+    code: 'user:edit',
+    name: '编辑用户',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 3,
+    menuId: 3,
+    code: 'user:delete',
+    name: '删除用户',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 4,
+    menuId: 3,
+    code: 'user:view',
+    name: '查看用户',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  // 角色管理菜单（id: 4）的按钮权限
+  {
+    id: 5,
+    menuId: 4,
+    code: 'role:add',
+    name: '新增角色',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 6,
+    menuId: 4,
+    code: 'role:edit',
+    name: '编辑角色',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 7,
+    menuId: 4,
+    code: 'role:delete',
+    name: '删除角色',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 8,
+    menuId: 4,
+    code: 'role:view',
+    name: '查看角色',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 9,
+    menuId: 4,
+    code: 'role:permission',
+    name: '分配权限',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  // 菜单管理菜单（id: 5）的按钮权限
+  {
+    id: 10,
+    menuId: 5,
+    code: 'menu:add',
+    name: '新增菜单',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 11,
+    menuId: 5,
+    code: 'menu:edit',
+    name: '编辑菜单',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 12,
+    menuId: 5,
+    code: 'menu:delete',
+    name: '删除菜单',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
+  },
+  {
+    id: 13,
+    menuId: 5,
+    code: 'menu:view',
+    name: '查看菜单',
+    status: 1,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00'
   }
 ]
 
@@ -184,17 +301,7 @@ export default [
     url: '/api/menu',
     method: 'post',
     response: ({ body }: { body: any }) => {
-      const {
-        path,
-        title,
-        icon,
-        compPath,
-        parentId,
-        sort,
-        status,
-        buttonPermissionIds,
-        apiPermissionIds
-      } = body
+      const { name, path, icon, compPath, parentId, sort, visible, status } = body
 
       // 检查同级菜单路径是否重复
       const flatList = flattenMenuList(menuList)
@@ -208,16 +315,16 @@ export default [
 
       const newMenu = {
         id: flatList.length > 0 ? Math.max(...flatList.map((m) => m.id)) + 1 : 1,
+        name,
         path,
-        title,
-        icon: icon || '',
-        compPath: compPath || '',
-        parentId: parentId || undefined,
+        icon: icon || null,
+        compPath: compPath || null,
+        parentId: parentId || null,
         sort: sort ?? 0,
+        visible: visible !== undefined ? visible : true,
         status: status ?? 1,
-        buttonPermissionIds: buttonPermissionIds || [],
-        apiPermissionIds: apiPermissionIds || [],
-        createTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+        createTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
+        updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
       }
 
       // 添加到扁平列表
@@ -262,6 +369,10 @@ export default [
         ...body,
         id,
         updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+      }
+      // 确保 visible 字段存在
+      if (flatList[index].visible === undefined) {
+        flatList[index].visible = true
       }
 
       // 重新构建树
@@ -354,44 +465,273 @@ export default [
     url: '/api/permission/list',
     method: 'get',
     response: () => {
-      // 模拟所有可用的API权限列表
+      // 模拟所有可用的API权限列表（根据 schema.prisma）
       const allApiPermissions = [
         // 用户相关API
-        { id: 1, code: 'GET:/api/user/list', name: '/api/user/list', method: 'GET' },
-        { id: 2, code: 'GET:/api/user/:id', name: '/api/user/:id', method: 'GET' },
-        { id: 3, code: 'POST:/api/user', name: '/api/user', method: 'POST' },
-        { id: 4, code: 'PUT:/api/user/:id', name: '/api/user/:id', method: 'PUT' },
-        { id: 5, code: 'DELETE:/api/user/:id', name: '/api/user/:id', method: 'DELETE' },
+        {
+          id: 1,
+          path: '/api/user/list',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取用户列表',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 2,
+          path: '/api/user/:id',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取用户详情',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 3,
+          path: '/api/user',
+          method: 'POST',
+          matchType: 'exact',
+          desc: '新增用户',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 4,
+          path: '/api/user/:id',
+          method: 'PUT',
+          matchType: 'exact',
+          desc: '更新用户',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 5,
+          path: '/api/user/:id',
+          method: 'DELETE',
+          matchType: 'exact',
+          desc: '删除用户',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
         // 角色相关API
-        { id: 6, code: 'GET:/api/role/list', name: '/api/role/list', method: 'GET' },
-        { id: 7, code: 'GET:/api/role/:id', name: '/api/role/:id', method: 'GET' },
-        { id: 8, code: 'POST:/api/role', name: '/api/role', method: 'POST' },
-        { id: 9, code: 'PUT:/api/role/:id', name: '/api/role/:id', method: 'PUT' },
-        { id: 10, code: 'DELETE:/api/role/:id', name: '/api/role/:id', method: 'DELETE' },
+        {
+          id: 6,
+          path: '/api/role/list',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取角色列表',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 7,
+          path: '/api/role/:id',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取角色详情',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 8,
+          path: '/api/role',
+          method: 'POST',
+          matchType: 'exact',
+          desc: '新增角色',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 9,
+          path: '/api/role/:id',
+          method: 'PUT',
+          matchType: 'exact',
+          desc: '更新角色',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 10,
+          path: '/api/role/:id',
+          method: 'DELETE',
+          matchType: 'exact',
+          desc: '删除角色',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 11,
+          path: '/api/role/:id/permissions',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取角色权限',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 12,
+          path: '/api/role/:id/permissions',
+          method: 'POST',
+          matchType: 'exact',
+          desc: '分配角色权限',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
         // 菜单相关API
-        { id: 11, code: 'GET:/api/menu/tree', name: '/api/menu/tree', method: 'GET' },
-        { id: 12, code: 'GET:/api/menu/:id', name: '/api/menu/:id', method: 'GET' },
-        { id: 13, code: 'POST:/api/menu', name: '/api/menu', method: 'POST' },
-        { id: 14, code: 'PUT:/api/menu/:id', name: '/api/menu/:id', method: 'PUT' },
-        { id: 15, code: 'DELETE:/api/menu/:id', name: '/api/menu/:id', method: 'DELETE' },
-        { id: 16, code: 'PUT:/api/menu/sort', name: '/api/menu/sort', method: 'PUT' },
+        {
+          id: 13,
+          path: '/api/menu/tree',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取菜单树',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 14,
+          path: '/api/menu/:id',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取菜单详情',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 15,
+          path: '/api/menu',
+          method: 'POST',
+          matchType: 'exact',
+          desc: '新增菜单',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 16,
+          path: '/api/menu/:id',
+          method: 'PUT',
+          matchType: 'exact',
+          desc: '更新菜单',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 17,
+          path: '/api/menu/:id',
+          method: 'DELETE',
+          matchType: 'exact',
+          desc: '删除菜单',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 18,
+          path: '/api/menu/sort',
+          method: 'PUT',
+          matchType: 'exact',
+          desc: '更新菜单排序',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
         // 权限相关API
-        { id: 17, code: 'GET:/api/permission/list', name: '/api/permission/list', method: 'GET' },
-        { id: 18, code: 'GET:/api/permission/tree', name: '/api/permission/tree', method: 'GET' },
+        {
+          id: 19,
+          path: '/api/permission/list',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取API权限列表',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
         // 文件上传相关API
-        { id: 19, code: 'POST:/api/file/upload', name: '/api/file/upload', method: 'POST' },
-        { id: 20, code: 'GET:/api/file/:id', name: '/api/file/:id', method: 'GET' },
-        { id: 21, code: 'DELETE:/api/file/:id', name: '/api/file/:id', method: 'DELETE' },
+        {
+          id: 20,
+          path: '/api/file/upload',
+          method: 'POST',
+          matchType: 'exact',
+          desc: '文件上传',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 21,
+          path: '/api/file/:id',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取文件',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 22,
+          path: '/api/file/:id',
+          method: 'DELETE',
+          matchType: 'exact',
+          desc: '删除文件',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
         // 认证相关API
-        { id: 22, code: 'POST:/api/auth/login', name: '/api/auth/login', method: 'POST' },
-        { id: 23, code: 'POST:/api/auth/logout', name: '/api/auth/logout', method: 'POST' },
-        { id: 24, code: 'GET:/api/auth/userinfo', name: '/api/auth/userinfo', method: 'GET' },
-        { id: 25, code: 'POST:/api/auth/refresh', name: '/api/auth/refresh', method: 'POST' }
+        {
+          id: 23,
+          path: '/api/auth/login',
+          method: 'POST',
+          matchType: 'exact',
+          desc: '用户登录',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 24,
+          path: '/api/auth/logout',
+          method: 'POST',
+          matchType: 'exact',
+          desc: '用户登出',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 25,
+          path: '/api/auth/userinfo',
+          method: 'GET',
+          matchType: 'exact',
+          desc: '获取用户信息',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 26,
+          path: '/api/auth/refresh',
+          method: 'POST',
+          matchType: 'exact',
+          desc: '刷新Token',
+          createTime: '2024-01-01 10:00:00',
+          updateTime: '2024-01-01 10:00:00'
+        }
       ]
 
       return {
         message: 'success',
         data: allApiPermissions
+      }
+    }
+  },
+  // 根据菜单ID获取按钮权限列表
+  {
+    url: '/api/permission/button/menu/:menuId',
+    method: 'get',
+    response: ({ query }: { query: any }) => {
+      const menuId = parseInt(query.menuId)
+      const buttons = buttonPermissionList.filter((btn) => btn.menuId === menuId)
+      // 转换为前端需要的格式（移除 menuId，添加 hidden 字段）
+      const result = buttons.map((btn) => ({
+        id: btn.id,
+        code: btn.code,
+        name: btn.name,
+        hidden: false // 默认不隐藏
+      }))
+      return {
+        message: 'success',
+        data: result
       }
     }
   },
@@ -408,28 +748,15 @@ export default [
         }
       }
 
-      // 模拟所有可用的按钮权限列表
-      const allButtonPermissions = [
-        // 用户相关按钮权限
-        { id: 1, code: 'user:add', name: '新增用户', hidden: false },
-        { id: 2, code: 'user:edit', name: '编辑用户', hidden: false },
-        { id: 3, code: 'user:delete', name: '删除用户', hidden: false },
-        { id: 4, code: 'user:view', name: '查看用户', hidden: false },
-        // 角色相关按钮权限
-        { id: 5, code: 'role:add', name: '新增角色', hidden: false },
-        { id: 6, code: 'role:edit', name: '编辑角色', hidden: false },
-        { id: 7, code: 'role:delete', name: '删除角色', hidden: false },
-        { id: 8, code: 'role:view', name: '查看角色', hidden: false },
-        { id: 9, code: 'role:permission', name: '分配权限', hidden: false },
-        // 菜单相关按钮权限
-        { id: 10, code: 'menu:add', name: '新增菜单', hidden: false },
-        { id: 11, code: 'menu:edit', name: '编辑菜单', hidden: false },
-        { id: 12, code: 'menu:delete', name: '删除菜单', hidden: false },
-        { id: 13, code: 'menu:view', name: '查看菜单', hidden: false }
-      ]
-
-      // 根据 ids 过滤返回对应的按钮权限
-      const buttonPermissions = allButtonPermissions.filter((permission) => ids.includes(permission.id))
+      // 根据 ids 过滤返回对应的按钮权限（移除 menuId，添加 hidden 字段）
+      const buttonPermissions = buttonPermissionList
+        .filter((permission) => ids.includes(permission.id))
+        .map((btn) => ({
+          id: btn.id,
+          code: btn.code,
+          name: btn.name,
+          hidden: false
+        }))
 
       return {
         message: 'success',
@@ -442,38 +769,49 @@ export default [
     url: '/api/permission/button',
     method: 'post',
     response: ({ body }: { body: any }) => {
-      const { code, name, hidden } = body
+      const { menuId, code, name, status } = body
 
-      // 模拟所有可用的按钮权限列表（用于生成新 ID）
-      const allButtonPermissions = [
-        { id: 1, code: 'user:add', name: '新增用户', hidden: false },
-        { id: 2, code: 'user:edit', name: '编辑用户', hidden: false },
-        { id: 3, code: 'user:delete', name: '删除用户', hidden: false },
-        { id: 4, code: 'user:view', name: '查看用户', hidden: false },
-        { id: 5, code: 'role:add', name: '新增角色', hidden: false },
-        { id: 6, code: 'role:edit', name: '编辑角色', hidden: false },
-        { id: 7, code: 'role:delete', name: '删除角色', hidden: false },
-        { id: 8, code: 'role:view', name: '查看角色', hidden: false },
-        { id: 9, code: 'role:permission', name: '分配权限', hidden: false },
-        { id: 10, code: 'menu:add', name: '新增菜单', hidden: false },
-        { id: 11, code: 'menu:edit', name: '编辑菜单', hidden: false },
-        { id: 12, code: 'menu:delete', name: '删除菜单', hidden: false },
-        { id: 13, code: 'menu:view', name: '查看菜单', hidden: false }
-      ]
+      if (!menuId) {
+        return {
+          message: '菜单ID不能为空',
+          data: null
+        }
+      }
+
+      // 检查同一菜单下是否已有相同 code 的按钮权限
+      const exists = buttonPermissionList.some((btn) => btn.menuId === menuId && btn.code === code)
+      if (exists) {
+        return {
+          message: '该菜单下已存在相同 code 的按钮权限',
+          data: null
+        }
+      }
 
       // 生成新 ID
-      const newId = allButtonPermissions.length > 0 ? Math.max(...allButtonPermissions.map((p) => p.id)) + 1 : 1
+      const newId =
+        buttonPermissionList.length > 0 ? Math.max(...buttonPermissionList.map((p) => p.id)) + 1 : 1
 
       const newButtonPermission = {
         id: newId,
+        menuId,
         code,
         name,
-        hidden: hidden || false
+        status: status ?? 1,
+        createTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
+        updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
       }
 
+      buttonPermissionList.push(newButtonPermission)
+
+      // 返回前端需要的格式（移除 menuId，添加 hidden 字段）
       return {
         message: 'success',
-        data: newButtonPermission
+        data: {
+          id: newButtonPermission.id,
+          code: newButtonPermission.code,
+          name: newButtonPermission.name,
+          hidden: false
+        }
       }
     }
   },
@@ -483,18 +821,48 @@ export default [
     method: 'put',
     response: ({ query, body }: { query: any; body: any }) => {
       const id = parseInt(query.id)
-      const { code, name, hidden } = body
-
-      const updatedButtonPermission = {
-        id,
-        code,
-        name,
-        hidden: hidden !== undefined ? hidden : false
+      const index = buttonPermissionList.findIndex((btn) => btn.id === id)
+      if (index === -1) {
+        return {
+          message: '按钮权限不存在',
+          data: null
+        }
       }
 
+      const { code, name, status } = body
+      const currentBtn = buttonPermissionList[index]
+
+      // 如果修改了 code，检查同一菜单下是否已有相同 code
+      if (code && code !== currentBtn.code) {
+        const exists = buttonPermissionList.some(
+          (btn) => btn.menuId === currentBtn.menuId && btn.code === code && btn.id !== id
+        )
+        if (exists) {
+          return {
+            message: '该菜单下已存在相同 code 的按钮权限',
+            data: null
+          }
+        }
+      }
+
+      // 更新按钮权限
+      buttonPermissionList[index] = {
+        ...buttonPermissionList[index],
+        code: code || currentBtn.code,
+        name: name || currentBtn.name,
+        status: status !== undefined ? status : currentBtn.status,
+        updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+      }
+
+      // 返回前端需要的格式
       return {
         message: 'success',
-        data: updatedButtonPermission
+        data: {
+          id: buttonPermissionList[index].id,
+          code: buttonPermissionList[index].code,
+          name: buttonPermissionList[index].name,
+          hidden: false
+        }
       }
     }
   },
@@ -504,17 +872,16 @@ export default [
     method: 'delete',
     response: ({ query }: { query: any }) => {
       const id = parseInt(query.id)
-
-      // 模拟删除操作：从所有菜单的 buttonPermissionIds 中移除该 id
-      const flatList = flattenMenuList(menuList)
-      flatList.forEach((menu) => {
-        if (menu.buttonPermissionIds && menu.buttonPermissionIds.includes(id)) {
-          menu.buttonPermissionIds = menu.buttonPermissionIds.filter((bid) => bid !== id)
+      const index = buttonPermissionList.findIndex((btn) => btn.id === id)
+      if (index === -1) {
+        return {
+          message: '按钮权限不存在',
+          data: null
         }
-      })
+      }
 
-      // 重新构建树
-      menuList = buildMenuTree(flatList)
+      // 删除按钮权限
+      buttonPermissionList.splice(index, 1)
 
       return {
         message: 'success',

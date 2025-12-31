@@ -1,17 +1,3 @@
-// 按钮权限项
-export interface ButtonPermission {
-  id: number
-  code: string
-  name: string
-  hidden: boolean
-}
-
-// 按钮权限列表
-export type ButtonPermissionList = ButtonPermission[]
-
-// 按钮权限映射表
-export type ButtonPermissionMap = Record<string, Omit<ButtonPermission, 'code'>>
-
 // 路由配置项
 export interface RouteConfig {
   path: string
@@ -26,30 +12,51 @@ export interface RouteConfig {
 // 路由配置列表
 export type RouteConfigList = RouteConfig[]
 
+// 按钮权限项
+export interface ButtonPermission {
+  id: number
+  code: string
+  name: string
+  status: number
+}
+
+// 按钮权限列表
+export type ButtonPermissionList = ButtonPermission[]
+
+// 按钮权限映射表
+export type ButtonPermissionMap = Record<string, Omit<ButtonPermission, 'code'>>
+
 // ========== RBAC 相关类型定义 ==========
 
 // API权限项
 export interface ApiPermission {
   id: number
-  code: string // 全局唯一，如 'GET:/api/user/list'
-  name: string // API名称，如 '获取用户列表'
+  path: string // API路径，如 '/api/user/list'
   method: string // HTTP方法，如 'GET', 'POST'
+  matchType: string // 匹配类型：'exact' 或 'prefix'
+  desc: string // 描述
+  createTime?: string
+  updateTime?: string
 }
 
 // API权限列表
 export type ApiPermissionList = ApiPermission[]
 
 // 菜单项（基于RouteConfig扩展）
-export interface MenuItem extends RouteConfig {
+export interface MenuItem {
   id: number
-  parentId?: number // 父菜单ID，根菜单为undefined
+  name: string // 菜单名称
+  path: string
+  icon: string
+  compPath: string
+  type: number // 类型：0-目录，1-菜单项
   sort: number // 排序值
+  visible: boolean // 是否显示
   status: number // 0-禁用，1-启用
-  buttonPermissionIds: number[] // 关联的按钮权限id数组
-  apiPermissionIds: number[] // 关联的API权限id数组
-  createTime?: string
-  updateTime?: string
-  children?: MenuItem[] // 子菜单
+  parentId: number | null // 父菜单ID，根菜单为null
+  children: MenuItem[] // 子菜单
+  createTime: string
+  updateTime: string
 }
 
 // 菜单树响应

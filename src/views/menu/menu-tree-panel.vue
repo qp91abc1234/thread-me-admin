@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, Edit, Plus } from '@element-plus/icons-vue'
-import { updateMenuSort, deleteMenu } from '@/common/api/menu'
+import { Delete, Plus } from '@element-plus/icons-vue'
+import { updateMenuSort, deleteMenu } from '@/common/api/permission'
 import MenuFormDialog from './dialogs/menu-form-dialog.vue'
 import { useInject } from './menu-context'
 import type { MenuItem } from '@/common/types/permission'
@@ -10,9 +10,12 @@ import type { MenuItem } from '@/common/types/permission'
 const { menuTree, loading, setCurrentNode, loadMenuTree } = useInject()
 const menuFormDialogRef = ref<InstanceType<typeof MenuFormDialog>>()
 
-// 菜单树节点点击
-const handleNodeClick = (data: MenuItem) => {
-  setCurrentNode(data)
+const handleAllowDrop = (_dragNode: any, dropNode: any) => {
+  const dropNodeData = dropNode.data as MenuItem
+  if (dropNodeData.type === 0) {
+    return true
+  }
+  return false
 }
 
 // 菜单树拖拽结束
@@ -48,14 +51,14 @@ const handleDragEnd = async (_dragNode: any, _dropNode: any, dropType: string) =
   }
 }
 
-// 新增菜单
-const handleAdd = (parentNode?: MenuItem) => {
-  menuFormDialogRef.value?.open(null, parentNode)
+// 新增目录
+const handleAddDirectory = (parentNode?: MenuItem) => {
+  menuFormDialogRef.value?.open(parentNode, 'directory')
 }
 
-// 编辑菜单
-const handleEdit = (node: MenuItem) => {
-  menuFormDialogRef.value?.open(node)
+// 新增菜单项
+const handleAddMenuItem = (parentNode?: MenuItem) => {
+  menuFormDialogRef.value?.open(parentNode, 'menu')
 }
 
 // 删除菜单
@@ -76,11 +79,6 @@ const handleDelete = async (node: MenuItem) => {
     }
   }
 }
-
-// 菜单表单保存成功
-const handleMenuFormSuccess = async () => {
-  await loadMenuTree()
-}
 </script>
 
 <template>
@@ -88,7 +86,14 @@ const handleMenuFormSuccess = async () => {
     <template #header>
       <div class="card-header">
         <span>菜单树</span>
-        <el-button type="primary" :icon="Plus" size="small" @click="handleAdd()">新增</el-button>
+        <div class="header-actions">
+          <el-button type="primary" :icon="Plus" size="small" @click="handleAddDirectory()">
+            新建目录
+          </el-button>
+          <el-button type="primary" :icon="Plus" size="small" @click="handleAddMenuItem()">
+            新建菜单项
+          </el-button>
+        </div>
       </div>
     </template>
     <el-tree
@@ -98,21 +103,48 @@ const handleMenuFormSuccess = async () => {
       node-key="id"
       default-expand-all
       draggable
-      :allow-drop="() => true"
+      :allow-drop="handleAllowDrop"
       :allow-drag="() => true"
-      @node-click="handleNodeClick"
+      @node-click="(data: MenuItem) => setCurrentNode(data)"
       @node-drop="handleDragEnd"
     >
       <template #default="{ node, data }">
         <div class="tree-node">
           <span>{{ node.label }}</span>
           <span class="node-actions">
-            <el-button type="primary" link size="small" :icon="Plus" @click.stop="handleAdd(data)">
-              添加
-            </el-button>
-            <el-button type="primary" link size="small" :icon="Edit" @click.stop="handleEdit(data)">
-              编辑
-            </el-button>
+            <!-- 目录节点：显示添加目录和添加菜单项两个按钮 -->
+            <template v-if="!data.compPath || data.compPath === ''">
+              <el-button
+                type="primary"
+                link
+                size="small"
+                :icon="Plus"
+                @click.stop="handleAddDirectory(data)"
+              >
+                添加目录
+              </el-button>
+              <el-button
+                type="primary"
+                link
+                size="small"
+                :icon="Plus"
+                @click.stop="handleAddMenuItem(data)"
+              >
+                添加菜单项
+              </el-button>
+            </template>
+            <!-- 菜单项节点：只显示添加菜单项按钮 -->
+            <template v-else>
+              <el-button
+                type="primary"
+                link
+                size="small"
+                :icon="Plus"
+                @click.stop="handleAddMenuItem(data)"
+              >
+                添加菜单项
+              </el-button>
+            </template>
             <el-button
               type="danger"
               link
@@ -129,7 +161,7 @@ const handleMenuFormSuccess = async () => {
   </el-card>
 
   <!-- 菜单表单弹窗 -->
-  <MenuFormDialog ref="menuFormDialogRef" @success="handleMenuFormSuccess" />
+  <MenuFormDialog ref="menuFormDialogRef" @success="loadMenuTree" />
 </template>
 
 <style lang="scss" scoped>
@@ -152,6 +184,11 @@ const handleMenuFormSuccess = async () => {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
   }
 
   // stylelint-disable-next-line selector-class-pattern

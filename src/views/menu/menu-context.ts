@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { useContext } from '@/common/hooks/use-context'
-import { getMenuTree, getAllApiPermissions } from '@/common/api/menu'
-import type { MenuItem, ApiPermission } from '@/common/types/permission'
+import { getMenuTree } from '@/common/api/permission'
+import type { MenuItem } from '@/common/types/permission'
 
 /**
  * 菜单页面 Context
@@ -11,31 +11,30 @@ export const { useProvide, useInject } = useContext('MenuContext', () => {
   const menuTree = ref<MenuItem[]>([])
   const currentNode = ref<MenuItem | null>(null)
   const loading = ref(false)
-  const allApiPermissions = ref<ApiPermission[]>([])
-  const loadingApiPermissions = ref(false)
 
   // 加载菜单树
   const loadMenuTree = async () => {
     loading.value = true
     try {
       const res = await getMenuTree()
-      menuTree.value = res.tree
+      // 兼容处理：将 name 映射到 title 用于显示
+      const processTree = (nodes: MenuItem[]): MenuItem[] => {
+        return nodes.map((node) => ({
+          ...node,
+          title: node.name, // 兼容旧字段
+          children: node.children ? processTree(node.children) : undefined
+        }))
+      }
+      menuTree.value = processTree(res.tree)
+
+      // 默认选中第一个节点
+      if (menuTree.value.length > 0 && !currentNode.value) {
+        setCurrentNode(menuTree.value[0])
+      }
     } catch (error) {
       console.error('加载菜单树失败:', error)
     } finally {
       loading.value = false
-    }
-  }
-
-  // 加载所有API权限
-  const loadAllApiPermissions = async () => {
-    loadingApiPermissions.value = true
-    try {
-      allApiPermissions.value = await getAllApiPermissions()
-    } catch (error) {
-      console.error('加载API权限列表失败:', error)
-    } finally {
-      loadingApiPermissions.value = false
     }
   }
 
@@ -46,7 +45,6 @@ export const { useProvide, useInject } = useContext('MenuContext', () => {
 
   const initContext = async () => {
     await loadMenuTree()
-    await loadAllApiPermissions()
   }
 
   return {
@@ -54,10 +52,7 @@ export const { useProvide, useInject } = useContext('MenuContext', () => {
     menuTree,
     currentNode,
     loading,
-    allApiPermissions,
-    loadingApiPermissions,
     loadMenuTree,
-    loadAllApiPermissions,
     setCurrentNode
   }
 })

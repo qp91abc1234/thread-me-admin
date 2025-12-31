@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { useContext } from '@/common/hooks/use-context'
-import { getMenuTree, getAllApiPermissions } from '@/common/api/menu'
+import { getMenuTree, getAllApiPermissions } from '@/common/api/permission'
 import type { MenuItem, ApiPermission } from '@/common/types/permission'
 
 /**
