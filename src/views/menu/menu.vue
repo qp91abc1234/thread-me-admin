@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import MenuTreePanel from './menu-tree-panel.vue'
 import MenuEditPanel from './menu-edit-panel.vue'
 import { useProvide } from './menu-context'
 
 // 提供菜单树 Context
 const { initContext } = useProvide()
-
-// 分割面板大小
-const splitSize = ref(0.3)
 
 // 初始化
 const init = async () => {
@@ -21,7 +17,7 @@ init()
 <template>
   <div class="menu-page">
     <el-splitter class="menu-splitter">
-      <el-splitter-panel :size="splitSize * 100 + '%'">
+      <el-splitter-panel :min="340" :size="340">
         <MenuTreePanel />
       </el-splitter-panel>
       <el-splitter-panel>
