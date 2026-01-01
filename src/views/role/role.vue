@@ -184,28 +184,21 @@ init()
         <el-table-column prop="createTime" label="创建时间" min-width="100" show-overflow-tooltip />
         <el-table-column label="操作" min-width="160" fixed="right" align="center">
           <template #default="{ row }">
-            <template v-if="!row.isSystem">
-              <el-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</el-button>
-              <el-button
-                type="success"
-                link
-                :icon="Key"
-                @click="handlePermissionConfig(row, 'menu')"
-              >
-                菜单权限
-              </el-button>
-              <el-button
-                type="warning"
-                link
-                :icon="Connection"
-                @click="handlePermissionConfig(row, 'api')"
-              >
-                API权限
-              </el-button>
-              <el-button type="danger" link :icon="Delete" @click="handleDelete(row)">
-                删除
-              </el-button>
-            </template>
+            <el-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</el-button>
+            <el-button type="success" link :icon="Key" @click="handlePermissionConfig(row, 'menu')">
+              菜单权限
+            </el-button>
+            <el-button
+              type="warning"
+              link
+              :icon="Connection"
+              @click="handlePermissionConfig(row, 'api')"
+            >
+              API权限
+            </el-button>
+            <el-button type="danger" link :icon="Delete" @click="handleDelete(row)">
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>

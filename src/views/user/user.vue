@@ -178,7 +178,6 @@ init()
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
             <el-switch
-              :disabled="row.isSystem"
               v-model="row.status"
               :active-value="1"
               :inactive-value="0"
@@ -189,12 +188,10 @@ init()
         <el-table-column prop="createTime" label="创建时间" min-width="170" show-overflow-tooltip />
         <el-table-column label="操作" width="150" fixed="right" align="center">
           <template #default="{ row }">
-            <template v-if="!row.isSystem">
-              <el-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</el-button>
-              <el-button type="danger" link :icon="Delete" @click="handleDelete(row)"
-                >删除
-              </el-button>
-            </template>
+            <el-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</el-button>
+            <el-button type="danger" link :icon="Delete" @click="handleDelete(row)"
+              >删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
