@@ -12,7 +12,7 @@ import type {
  * @param params 查询参数
  * @returns 用户列表响应
  */
-export function getUserList(params: UserQueryParams): Promise<UserListResponse> {
+export function getUserList(params: UserQueryParams = {}): Promise<UserListResponse> {
   return requestPost<UserListResponse>('/user/list', params).then((res) => res.data)
 }
 

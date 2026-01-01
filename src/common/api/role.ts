@@ -13,7 +13,7 @@ import type {
  * @param params 查询参数
  * @returns 角色列表响应
  */
-export function getRoleList(params: RoleQueryParams): Promise<RoleListResponse> {
+export function getRoleList(params: RoleQueryParams = {}): Promise<RoleListResponse> {
   return requestPost<RoleListResponse>('/role/list', params).then((res) => res.data)
 }
 

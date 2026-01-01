@@ -18,8 +18,8 @@ export type UpdateRole = Partial<Omit<Role, 'id' | 'isSystem' | 'createTime' | '
 export interface RoleQueryParams {
   name?: string
   status?: number
-  currentPage: number
-  pageSize: number
+  currentPage?: number
+  pageSize?: number
 }
 
 // 角色列表响应

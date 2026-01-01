@@ -24,8 +24,8 @@ export type UpdateUser = Partial<Omit<User, 'id' | 'isSystem' | 'createTime' | '
 export interface UserQueryParams {
   username?: string
   status?: number
-  currentPage: number
-  pageSize: number
+  currentPage?: number
+  pageSize?: number
 }
 
 // 用户列表响应

@@ -13,10 +13,7 @@ export const { useProvide, useInject } = useContext('UserContext', () => {
   // 加载角色列表
   const loadRoleOptions = async () => {
     try {
-      const res = await getRoleList({
-        currentPage: 1,
-        pageSize: 1000
-      })
+      const res = await getRoleList()
       roleOptions.value = res.list
     } catch (error) {
       console.error('加载角色列表失败:', error)
