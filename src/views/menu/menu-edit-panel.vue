@@ -11,7 +11,7 @@ import { useInject } from './menu-context'
 import ButtonPermissionDialog from './dialogs/button-permission-dialog.vue'
 import type { ButtonPermission } from '@/common/types/permission'
 
-const { currentNode, setCurrentNode } = useInject()
+const { currentNode } = useInject()
 
 // 表单引用
 const menuFormRef = ref<FormInstance>()
@@ -155,7 +155,9 @@ const handleSave = async (formEl: FormInstance | undefined) => {
         const updatedMenu = await updateMenu(menuForm.id, menuForm)
         ElMessage.success('保存成功')
         // 更新当前节点
-        setCurrentNode({ ...currentNode.value, ...updatedMenu })
+        if (currentNode.value) {
+          Object.assign(currentNode.value, updatedMenu)
+        }
       } catch (error: any) {
         ElMessage.error(error.message || '保存失败')
       }
