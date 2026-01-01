@@ -92,10 +92,7 @@ export const usePermissionStore = defineStore('permission', () => {
   function initButtonPermissions(buttonList: ButtonPermissionList) {
     buttonPermissionMap.value = {}
     buttonList.forEach((button) => {
-      buttonPermissionMap.value[button.code] = {
-        name: button.name,
-        hidden: button.hidden
-      }
+      buttonPermissionMap.value[button.code] = button
     })
   }
 
