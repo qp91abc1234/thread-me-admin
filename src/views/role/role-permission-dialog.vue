@@ -4,7 +4,7 @@ import type { TransferKey } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { getRolePermissions, assignRolePermissions } from '@/common/api/role'
 import { useInject } from './role-context'
-import type { RolePermission } from '@/common/types/role'
+import type { Role, RolePermission } from '@/common/types/role'
 
 const emit = defineEmits<{
   (e: 'success'): void
@@ -13,6 +13,7 @@ const emit = defineEmits<{
 const dialogVisible = ref(false)
 const menuTreeRef = ref()
 const currentRoleId = ref<number>(0)
+const isSystem = ref<boolean>(false)
 const activeTab = ref('menu') // 默认显示菜单权限标签页
 
 // 从 Context 注入菜单树和API权限列表
@@ -24,17 +25,55 @@ const permissionForm = reactive<RolePermission>({
   apiPermissionIds: []
 })
 
+// 初始权限数据（用于比对是否有更改）
+const initialPermissions = ref<RolePermission>({
+  menuIds: [],
+  apiPermissionIds: []
+})
+
+// 比对两个权限对象是否相同
+const isPermissionsEqual = (perm1: RolePermission, perm2: RolePermission): boolean => {
+  // 比对菜单ID数组（需要排序后比较）
+  const menuIds1 = [...(perm1.menuIds || [])].sort((a, b) => a - b)
+  const menuIds2 = [...(perm2.menuIds || [])].sort((a, b) => a - b)
+  if (menuIds1.length !== menuIds2.length) {
+    return false
+  }
+  if (menuIds1.some((id, index) => id !== menuIds2[index])) {
+    return false
+  }
+
+  // 比对API权限ID数组（需要排序后比较）
+  const apiIds1 = [...(perm1.apiPermissionIds || [])].sort((a, b) => a - b)
+  const apiIds2 = [...(perm2.apiPermissionIds || [])].sort((a, b) => a - b)
+  if (apiIds1.length !== apiIds2.length) {
+    return false
+  }
+  if (apiIds1.some((id, index) => id !== apiIds2[index])) {
+    return false
+  }
+
+  return true
+}
+
 // 打开对话框
-const open = async (roleId: number, defaultTab: 'menu' | 'api' = 'menu') => {
-  currentRoleId.value = roleId
+const open = async (role: Role, defaultTab: 'menu' | 'api' = 'menu') => {
+  currentRoleId.value = role.id
+  isSystem.value = role.isSystem
   activeTab.value = defaultTab
   dialogVisible.value = true
 
   // 加载角色权限
   try {
-    const permissions = await getRolePermissions(roleId)
+    const permissions = await getRolePermissions(role.id)
     permissionForm.menuIds = permissions.menuIds || []
     permissionForm.apiPermissionIds = permissions.apiPermissionIds || []
+
+    // 保存初始权限数据（深拷贝）
+    initialPermissions.value = {
+      menuIds: [...(permissions.menuIds || [])],
+      apiPermissionIds: [...(permissions.apiPermissionIds || [])]
+    }
 
     // 设置菜单树选中状态
     if (menuTreeRef.value) {
@@ -61,6 +100,13 @@ const handleApiPermissionChange = (value: TransferKey[]) => {
 
 // 保存权限配置
 const handleSave = async () => {
+  if (isPermissionsEqual(permissionForm, initialPermissions.value)) {
+    // 没有更改，直接关闭
+    handleCancel()
+    return
+  }
+
+  // 有更改，执行保存
   try {
     await assignRolePermissions(currentRoleId.value, permissionForm)
     ElMessage.success('权限配置成功')
@@ -143,7 +189,7 @@ defineExpose({
 
     <template #footer>
       <el-button @click="handleCancel">取消</el-button>
-      <el-button type="primary" @click="handleSave">确定</el-button>
+      <el-button :disabled="isSystem" type="primary" @click="handleSave">确定</el-button>
     </template>
   </el-dialog>
 </template>

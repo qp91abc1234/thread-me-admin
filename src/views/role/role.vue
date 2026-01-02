@@ -6,6 +6,7 @@ import { getRoleList, deleteRole, updateRole } from '@/common/api/role'
 import RoleFormDialog from './role-form-dialog.vue'
 import RolePermissionDialog from './role-permission-dialog.vue'
 import { useProvide } from './role-context'
+import { formatDateTime } from '@/common/utils'
 import type { Role, RoleQueryParams } from '@/common/types/role'
 
 const loading = ref(false)
@@ -106,7 +107,7 @@ const handleStatusChange = async (row: Role) => {
 
 // 打开权限配置弹窗
 const handlePermissionConfig = (row: Role, type: 'menu' | 'api') => {
-  rolePermissionDialogRef.value?.open(row.id, type)
+  rolePermissionDialogRef.value?.open(row, type)
 }
 
 // 分页
@@ -174,6 +175,7 @@ init()
         <el-table-column prop="status" label="状态" min-width="100" align="center">
           <template #default="{ row }">
             <el-switch
+              :disabled="row.isSystem"
               v-model="row.status"
               :active-value="1"
               :inactive-value="0"
@@ -181,20 +183,16 @@ init()
             />
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" min-width="100" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="创建时间" min-width="170" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ formatDateTime(row.createTime) }}
+          </template>
+        </el-table-column>
         <el-table-column label="操作" min-width="160" fixed="right" align="center">
           <template #default="{ row }">
             <el-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</el-button>
             <el-button type="success" link :icon="Key" @click="handlePermissionConfig(row, 'menu')">
-              菜单权限
-            </el-button>
-            <el-button
-              type="warning"
-              link
-              :icon="Connection"
-              @click="handlePermissionConfig(row, 'api')"
-            >
-              API权限
+              权限设置
             </el-button>
             <el-button type="danger" link :icon="Delete" @click="handleDelete(row)">
               删除
