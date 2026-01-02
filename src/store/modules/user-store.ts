@@ -52,12 +52,12 @@ export const useUserStore = defineStore('user', () => {
    */
   async function login(params: { username: string; password: string }): Promise<void> {
     const res = await loginApi(params)
-    const user = await getUserDetail(res.userId)
-
     userId.value = res.userId
-    userInfo.value = user
     token.value = res.token
     refreshToken.value = res.refreshToken
+
+    const user = await getUserDetail(res.userId)
+    userInfo.value = user
   }
 
   /**

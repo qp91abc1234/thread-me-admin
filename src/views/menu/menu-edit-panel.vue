@@ -95,7 +95,7 @@ watch(
   async (node) => {
     if (!node) return
     // 加载表单数据
-    resetForm(node)
+    Object.assign(menuForm, node)
 
     // 加载按钮权限（只有菜单项才有按钮权限）
     if (menuForm.type === 1) {
@@ -122,25 +122,6 @@ const loadButtonPermissions = async (menuId: number) => {
     buttonPermissionTable.value = []
   } finally {
     loadingButtonPermissions.value = false
-  }
-}
-
-// 重置表单
-const resetForm = (node?) => {
-  if (node) {
-    Object.assign(menuForm, node)
-  } else {
-    Object.assign(menuForm, {
-      id: 0,
-      path: '',
-      name: '',
-      icon: '',
-      compPath: '',
-      type: 0,
-      sort: 0,
-      visible: true,
-      status: 1
-    })
   }
 }
 
@@ -229,11 +210,6 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
           </el-row>
           <el-row :gutter="20">
             <el-col :span="8">
-              <el-form-item label="排序">
-                <el-input-number v-model="menuForm.sort" :min="0" style="width: 100%" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="是否显示">
                 <el-switch
                   v-model="menuForm.visible"
@@ -252,7 +228,7 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
             </el-col>
           </el-row>
           <el-row v-if="menuForm.type === 1">
-            <el-col :span="24">
+            <el-col :span="12">
               <el-form-item
                 label="组件路径"
                 prop="compPath"
