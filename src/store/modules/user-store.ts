@@ -1,8 +1,10 @@
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import { createStorageRef } from '@/common/utils/storage'
 import { login as loginApi, refreshToken as refreshTokenApi } from '@/common/api/auth'
+import { getUserDetail } from '@/common/api/user'
+import type { User } from '@/common/types/user'
 
 /**
  * 用户状态 Store
@@ -29,6 +31,10 @@ import { login as loginApi, refreshToken as refreshTokenApi } from '@/common/api
  */
 export const useUserStore = defineStore('user', () => {
   // ==================== 认证状态 ====================
+  // 用户ID
+  const userId = createStorageRef<number>('userId', -1)
+  /** 用户信息 */
+  const userInfo = ref<User>()
   /** 访问令牌 */
   const token = createStorageRef('token', '')
 
@@ -46,10 +52,12 @@ export const useUserStore = defineStore('user', () => {
    */
   async function login(params: { username: string; password: string }): Promise<void> {
     const res = await loginApi(params)
+    const user = await getUserDetail(res.userId)
 
-    // 保存令牌
-    token.value = res?.token ?? ''
-    refreshToken.value = res?.refreshToken ?? ''
+    userId.value = res.userId
+    userInfo.value = user
+    token.value = res.token
+    refreshToken.value = res.refreshToken
   }
 
   /**
@@ -82,6 +90,10 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     // 状态
+    /** 用户ID */
+    userId,
+    /** 用户信息 */
+    userInfo,
     /** 访问令牌 */
     token,
     /** 刷新令牌 */

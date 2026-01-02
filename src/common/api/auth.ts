@@ -22,6 +22,8 @@ export interface RefreshTokenParams {
  * 认证响应数据
  */
 export interface AuthResponse {
+  /** 用户ID */
+  userId: number
   /** 访问令牌 */
   token: string
   /** 刷新令牌 */

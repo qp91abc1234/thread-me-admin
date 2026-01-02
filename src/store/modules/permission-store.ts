@@ -2,71 +2,31 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import type { RouteRecordRaw } from 'vue-router'
-import type {
-  RouteConfigList,
-  ButtonPermissionMap,
-  ButtonPermissionList
-} from '@/common/types/permission'
+import { getMenuTree } from '@/common/api/permission'
+import { useUserStore } from './user-store'
+import type { MenuItem } from '@/common/types/permission'
 
 // 视图组件模块映射（用于动态导入）
 const viewComponentModules = import.meta.glob('@/views/**/*.vue')
 
+const HOME_ROUTE = {
+  path: 'home',
+  name: '首页',
+  compPath: '/src/views/home/home.vue',
+  icon: 'Sunny'
+} as MenuItem
+
 const ERROR_ROUTE = {
   path: ':pathMatch(.*)*',
-  title: '404',
+  name: '404',
   compPath: '/src/views/error/error.vue',
   visible: false
-}
-
-// 路由配置数据（实际项目中应该从后端获取）
-const ROUTE_CONFIG: RouteConfigList = [
-  {
-    path: 'home',
-    title: '首页',
-    compPath: '/src/views/home/home.vue',
-    icon: 'Sunny'
-  },
-  {
-    path: 'rbac',
-    title: '权限管理',
-    icon: 'Lock',
-    children: [
-      {
-        path: 'user',
-        title: '用户管理',
-        compPath: '/src/views/user/user.vue'
-      },
-      {
-        path: 'role',
-        title: '角色管理',
-        compPath: '/src/views/role/role.vue'
-      },
-      {
-        path: 'menu',
-        title: '菜单管理',
-        compPath: '/src/views/menu/menu.vue'
-      }
-    ]
-  },
-  {
-    path: 'tools',
-    title: '工具中心',
-    icon: 'Tools',
-    children: [
-      {
-        path: 'file-upload',
-        title: '文件上传',
-        compPath: '/src/views/file-upload/file-upload.vue'
-      }
-    ]
-  }
-]
+} as MenuItem
 
 export const usePermissionStore = defineStore('permission', () => {
+  const userStore = useUserStore()
   // 权限是否已初始化
   const isInitialized = ref(false)
-  // 按钮权限映射表
-  const buttonPermissionMap = ref<ButtonPermissionMap>({})
   // 路由树
   const routeTree = ref<RouteRecordRaw[]>([])
   // 路由映射表（用于面包屑等场景）
@@ -74,66 +34,43 @@ export const usePermissionStore = defineStore('permission', () => {
 
   /**
    * 初始化权限数据并构建路由树
-   * TODO: 实际项目中应该从后端接口获取权限数据
    */
   async function initPermissions() {
-    // TODO: 这里应该调用接口获取按钮权限列表
-    // const buttonList = await fetchButtonPermissions()
-    initButtonPermissions([])
-
-    // 构建路由树
-    buildRouteTree(ROUTE_CONFIG.concat(ERROR_ROUTE), routeTree.value)
-  }
-
-  /**
-   * 初始化按钮权限映射表
-   * @param buttonList 按钮权限列表
-   */
-  function initButtonPermissions(buttonList: ButtonPermissionList) {
-    buttonPermissionMap.value = {}
-    buttonList.forEach((button) => {
-      buttonPermissionMap.value[button.code] = button
-    })
+    const res = await getMenuTree(1, userStore.userInfo?.roleIds)
+    const menuTree = [HOME_ROUTE].concat(res.tree).concat(ERROR_ROUTE)
+    buildRouteTree(menuTree, routeTree.value)
   }
 
   /**
    * 递归构建路由树
-   * @param routeConfigs 路由配置数组
+   * @param menuTree 菜单树
    * @param routes 存放路由的容器
    * @param parentPath 父级路径
    * @returns 返回是否所有子路由都被禁用及第一个可见路径
    */
   function buildRouteTree(
-    routeConfigs: RouteConfigList,
+    menuTree: MenuItem[],
     routes: RouteRecordRaw[] = [],
     parentPath = '/'
-  ): { allDisabled: boolean; firstVisiblePath: string } {
-    let allDisabled = true
+  ): { firstVisiblePath: string } {
     let firstVisiblePath = ''
 
-    for (const routeConfig of routeConfigs) {
-      const isDisabled = routeConfig.disabled ?? false
-      const isVisible = routeConfig.visible ?? true
-
-      // 跳过被禁用的路由
-      if (isDisabled) {
-        continue
-      }
-      allDisabled = false
+    for (const menuItem of menuTree) {
+      const isVisible = menuItem.visible ?? true
 
       // 构建完整路由路径
       const routePath = parentPath.endsWith('/')
-        ? `${parentPath}${routeConfig.path}`
-        : `${parentPath}/${routeConfig.path}`
+        ? `${parentPath}${menuItem.path}`
+        : `${parentPath}/${menuItem.path}`
 
       // 构建路由记录对象
       const routeRecord: any = {
         path: routePath,
         name: routePath,
-        component: routeConfig.compPath ? viewComponentModules[routeConfig.compPath] : undefined,
+        component: menuItem.compPath ? viewComponentModules[menuItem.compPath] : undefined,
         meta: {
-          title: routeConfig.title,
-          icon: routeConfig.icon,
+          title: menuItem.name,
+          icon: menuItem.icon,
           visible: isVisible
         }
       }
@@ -144,15 +81,13 @@ export const usePermissionStore = defineStore('permission', () => {
       }
 
       // 处理子路由
-      if (!routeConfig.compPath && routeConfig.children && routeConfig.children.length > 0) {
+      if (!menuItem.compPath && menuItem.children && menuItem.children.length > 0) {
         routeRecord.children = []
-        const { allDisabled: childAllDisabled, firstVisiblePath: childFirstVisiblePath } =
-          buildRouteTree(routeConfig.children, routeRecord.children, routePath)
-
-        // 如果所有子路由都被禁用，跳过当前路由
-        if (childAllDisabled) {
-          continue
-        }
+        const { firstVisiblePath: childFirstVisiblePath } = buildRouteTree(
+          menuItem.children,
+          routeRecord.children,
+          routePath
+        )
 
         // 设置重定向到第一个可见的子路由
         if (childFirstVisiblePath) {
@@ -165,14 +100,14 @@ export const usePermissionStore = defineStore('permission', () => {
 
       // 使用完整路径作为 key，避免重复
       routeMap.value[routePath] = {
-        title: routeConfig.title,
+        title: menuItem.name,
         jumpPath: routeRecord.redirect || routeRecord.path
       }
 
       routes.push(routeRecord)
     }
 
-    return { allDisabled, firstVisiblePath }
+    return { firstVisiblePath }
   }
 
   /**
@@ -180,14 +115,12 @@ export const usePermissionStore = defineStore('permission', () => {
    */
   function reset() {
     isInitialized.value = false
-    buttonPermissionMap.value = {}
     routeTree.value = []
     routeMap.value = {}
   }
 
   return {
     isInitialized,
-    buttonPermissionMap,
     routeTree,
     routeMap,
     initPermissions,
