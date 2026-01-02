@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/modules/app-store'
 import { usePermissionStore } from '@/store/modules/permission-store'
 
 import SubMenu from '@/modules/layout/sider/sub-menu.vue'
+import { Sunny } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const permissionStore = usePermissionStore()
@@ -34,6 +35,12 @@ export const SIDE_COLLAPSED_WIDTH = 64
         :collapse="appStore.siderCollapsed"
         router
       >
+        <el-menu-item index="/home">
+          <component :is="Sunny" class="menu-icon"></component>
+          <template #title>
+            <span>首页</span>
+          </template>
+        </el-menu-item>
         <template v-for="item in permissionStore.routeTree" :key="item.path">
           <SubMenu :data="item"></SubMenu>
         </template>
@@ -81,6 +88,13 @@ export const SIDE_COLLAPSED_WIDTH = 64
         width: 80px;
       }
     }
+  }
+
+  .menu-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-right: 5px;
   }
 }
 </style>

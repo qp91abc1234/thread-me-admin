@@ -9,20 +9,6 @@ import type { MenuItem } from '@/common/types/permission'
 // 视图组件模块映射（用于动态导入）
 const viewComponentModules = import.meta.glob('@/views/**/*.vue')
 
-const HOME_ROUTE = {
-  path: 'home',
-  name: '首页',
-  compPath: '/src/views/home/home.vue',
-  icon: 'Sunny'
-} as MenuItem
-
-const ERROR_ROUTE = {
-  path: ':pathMatch(.*)*',
-  name: '404',
-  compPath: '/src/views/error/error.vue',
-  visible: false
-} as MenuItem
-
 export const usePermissionStore = defineStore('permission', () => {
   const userStore = useUserStore()
   // 权限是否已初始化
@@ -37,8 +23,7 @@ export const usePermissionStore = defineStore('permission', () => {
    */
   async function initPermissions() {
     const res = await getMenuTree(1, userStore.userInfo?.roleIds)
-    const menuTree = [HOME_ROUTE].concat(res.tree).concat(ERROR_ROUTE)
-    buildRouteTree(menuTree, routeTree.value)
+    buildRouteTree(res.tree, routeTree.value)
   }
 
   /**

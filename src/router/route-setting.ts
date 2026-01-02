@@ -14,6 +14,13 @@ export async function buildAsyncRoutes(router: Router) {
   permissionStore.routeTree.forEach((item) => {
     router.addRoute(layoutRouteName, item)
   })
+  router.addRoute(layoutRouteName, {
+    path: ':pathMatch(.*)*',
+    component: () => import('@/views/error/error.vue'),
+    meta: {
+      title: '404'
+    }
+  })
   permissionStore.isInitialized = true
 }
 
@@ -31,6 +38,15 @@ export const allRoutes = [
     redirect: '/home',
     name: layoutRouteName,
     component: () => import('@/modules/layout/layout.vue'),
-    children: []
+    children: [
+      {
+        path: '/home',
+        component: () => import('@/views/home/home.vue'),
+        meta: {
+          title: '首页',
+          icon: 'Sunny'
+        }
+      }
+    ]
   }
 ]

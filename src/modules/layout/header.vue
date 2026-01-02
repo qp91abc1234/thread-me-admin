@@ -8,8 +8,8 @@ import { usePermissionStore } from '@/store/modules/permission-store'
 
 import { setCssVar } from '@/common/utils/css'
 
-import type { Tab } from '@/store/modules/hooks/useTabs'
 import type { ElDropdown, ElScrollbar } from 'element-plus'
+import type { Tab } from '@/store/modules/hooks/use-tabs'
 
 type RightClickData = {
   clientX: string
