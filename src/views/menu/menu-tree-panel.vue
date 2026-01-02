@@ -10,12 +10,12 @@ import type { MenuItem } from '@/common/types/permission'
 const { menuTree, loading, setCurrentNode, loadMenuTree } = useInject()
 const menuFormDialogRef = ref<InstanceType<typeof MenuFormDialog>>()
 
-const handleAllowDrop = (_dragNode: any, dropNode: any) => {
+const handleAllowDrop = (_dragNode: any, dropNode: any, type: string) => {
   const dropNodeData = dropNode.data as MenuItem
-  if (dropNodeData.type === 0) {
-    return true
+  if (dropNodeData.type === 1 && type === 'inner') {
+    return false
   }
-  return false
+  return true
 }
 
 // 菜单树拖拽结束

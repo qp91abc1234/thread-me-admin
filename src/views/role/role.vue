@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, Edit, Plus, Refresh, Search, Key, Connection } from '@element-plus/icons-vue'
+import { Delete, Edit, Plus, Refresh, Search, Key } from '@element-plus/icons-vue'
 import { getRoleList, deleteRole, updateRole } from '@/common/api/role'
 import RoleFormDialog from './role-form-dialog.vue'
 import RolePermissionDialog from './role-permission-dialog.vue'
