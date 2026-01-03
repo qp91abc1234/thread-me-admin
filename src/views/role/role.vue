@@ -156,7 +156,9 @@ init()
           </el-select>
         </el-form-item>
         <el-form-item>
-          <permission-button type="primary" :icon="Search" @click="handleSearch">搜索</permission-button>
+          <permission-button type="primary" :icon="Search" @click="handleSearch"
+            >搜索</permission-button
+          >
           <permission-button :icon="Refresh" @click="handleReset">重置</permission-button>
         </el-form-item>
       </el-form>
@@ -190,11 +192,29 @@ init()
         </el-table-column>
         <el-table-column label="操作" min-width="160" fixed="right" align="center">
           <template #default="{ row }">
-            <permission-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</permission-button>
-            <permission-button type="success" link :icon="Key" @click="handlePermissionConfig(row, 'menu')">
+            <permission-button
+              :disabled="row.isSystem"
+              type="primary"
+              link
+              :icon="Edit"
+              @click="handleEdit(row)"
+              >编辑</permission-button
+            >
+            <permission-button
+              type="success"
+              link
+              :icon="Key"
+              @click="handlePermissionConfig(row, 'menu')"
+            >
               权限设置
             </permission-button>
-            <permission-button type="danger" link :icon="Delete" @click="handleDelete(row)">
+            <permission-button
+              :disabled="row.isSystem"
+              type="danger"
+              link
+              :icon="Delete"
+              @click="handleDelete(row)"
+            >
               删除
             </permission-button>
           </template>
