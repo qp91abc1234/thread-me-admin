@@ -190,10 +190,10 @@ init()
             {{ formatDateTime(row.createTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="160" fixed="right" align="center">
+        <el-table-column label="操作" min-width="160" fixed="right" align="left">
           <template #default="{ row }">
             <permission-button
-              :disabled="row.isSystem"
+              v-if="!row.isSystem"
               type="primary"
               link
               :icon="Edit"
@@ -209,7 +209,7 @@ init()
               权限设置
             </permission-button>
             <permission-button
-              :disabled="row.isSystem"
+              v-if="!row.isSystem"
               type="danger"
               link
               :icon="Delete"
