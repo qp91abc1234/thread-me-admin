@@ -1,7 +1,6 @@
 import axios, { type AxiosInstance, type AxiosError, type AxiosResponse } from 'axios'
 
 import { useUserStore } from '@/store/modules/user-store'
-import { useRouter } from 'vue-router'
 
 /**
  * 刷新 token 队列中的任务
@@ -57,7 +56,6 @@ instance.interceptors.response.use(
   },
   (error: AxiosError<{ code: string; message: string }>) => {
     const userStore = useUserStore()
-    const router = useRouter()
     const { response, config } = error
 
     // 没有响应（网络错误、超时等）
@@ -78,7 +76,6 @@ instance.interceptors.response.use(
           })
           .catch(() => {
             userStore.logout()
-            router.push('/login')
             queue.forEach(({ reject }) => reject(error))
           })
           .finally(() => {
@@ -99,7 +96,6 @@ instance.interceptors.response.use(
     // Token 无效 - 清除 token，跳转登录
     if (status === 401 && data.code === 'TOKEN_INVALID') {
       userStore.logout()
-      router.push('/login')
     }
 
     return Promise.reject(error)

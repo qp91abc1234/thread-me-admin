@@ -22,6 +22,8 @@ export const usePermissionStore = defineStore('permission', () => {
   const routeMap = ref<Record<string, { title: string; jumpPath: string | undefined }>>({})
   // 按钮权限缓存：key 为菜单ID，value 为按钮权限 code 数组
   const buttonPermissionsCache = ref<Record<number, string[]>>({})
+  // 正在进行的请求 Promise 缓存：key 为菜单ID，value 为请求 Promise
+  const pendingRequests = new Map<number, Promise<string[]>>()
 
   /**
    * 初始化权限数据并构建路由树
@@ -102,7 +104,7 @@ export const usePermissionStore = defineStore('permission', () => {
   }
 
   /**
-   * 根据菜单ID获取按钮权限 code 数组（带缓存）
+   * 根据菜单ID获取按钮权限 code 数组（带缓存和请求去重）
    * @param menuId 菜单ID
    * @returns 按钮权限 code 数组
    */
@@ -112,13 +114,30 @@ export const usePermissionStore = defineStore('permission', () => {
       return buttonPermissionsCache.value[menuId]
     }
 
-    // 从API获取
-    const buttons = await fetchButtonPermissionsByMenuId(menuId)
-    // 只缓存启用的按钮权限的 code 数组
-    const codes = buttons.filter((btn) => btn.status === 1).map((btn) => btn.code)
-    buttonPermissionsCache.value[menuId] = codes
+    // 如果已经有相同 menuId 的请求正在进行，直接返回该 Promise
+    if (pendingRequests.has(menuId)) {
+      return pendingRequests.get(menuId)!
+    }
 
-    return codes
+    // 创建新的请求 Promise
+    const requestPromise = (async () => {
+      try {
+        // 从API获取
+        const buttons = await fetchButtonPermissionsByMenuId(menuId)
+        // 只缓存启用的按钮权限的 code 数组
+        const codes = buttons.filter((btn) => btn.status === 1).map((btn) => btn.code)
+        buttonPermissionsCache.value[menuId] = codes
+        return codes
+      } finally {
+        // 请求完成后，从 pendingRequests 中移除
+        pendingRequests.delete(menuId)
+      }
+    })()
+
+    // 将请求 Promise 存入 Map，避免重复请求
+    pendingRequests.set(menuId, requestPromise)
+
+    return requestPromise
   }
 
   /**
@@ -128,8 +147,12 @@ export const usePermissionStore = defineStore('permission', () => {
   function clearButtonPermissionsCache(menuId?: number) {
     if (menuId !== undefined) {
       delete buttonPermissionsCache.value[menuId]
+      // 同时清除该菜单的 pending 请求
+      pendingRequests.delete(menuId)
     } else {
       buttonPermissionsCache.value = {}
+      // 清除所有 pending 请求
+      pendingRequests.clear()
     }
   }
 
@@ -141,6 +164,7 @@ export const usePermissionStore = defineStore('permission', () => {
     routeTree.value = []
     routeMap.value = {}
     buttonPermissionsCache.value = {}
+    pendingRequests.clear()
   }
 
   return {

@@ -5,6 +5,7 @@ import { createStorageRef } from '@/common/utils/storage'
 import { login as loginApi, refreshToken as refreshTokenApi } from '@/common/api/auth'
 import { getUserDetail } from '@/common/api/user'
 import type { User } from '@/common/types/user'
+import { useRouter } from 'vue-router'
 
 /**
  * 用户状态 Store
@@ -96,10 +97,12 @@ export const useUserStore = defineStore('user', () => {
    * 清除所有认证信息
    */
   function logout(): void {
+    const router = useRouter()
     token.value = ''
     refreshToken.value = ''
     userId.value = -1
     userInfo.value = undefined
+    router.replace('/login')
   }
 
   return {
