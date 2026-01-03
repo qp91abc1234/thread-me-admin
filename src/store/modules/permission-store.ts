@@ -2,7 +2,10 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import type { RouteRecordRaw } from 'vue-router'
-import { getMenuTree } from '@/common/api/permission'
+import {
+  getMenuTree,
+  getButtonPermissionsByMenuId as fetchButtonPermissionsByMenuId
+} from '@/common/api/permission'
 import { useUserStore } from './user-store'
 import type { MenuItem } from '@/common/types/permission'
 
@@ -17,6 +20,8 @@ export const usePermissionStore = defineStore('permission', () => {
   const routeTree = ref<RouteRecordRaw[]>([])
   // 路由映射表（用于面包屑等场景）
   const routeMap = ref<Record<string, { title: string; jumpPath: string | undefined }>>({})
+  // 按钮权限缓存：key 为菜单ID，value 为按钮权限 code 数组
+  const buttonPermissionsCache = ref<Record<number, string[]>>({})
 
   /**
    * 初始化权限数据并构建路由树
@@ -54,6 +59,7 @@ export const usePermissionStore = defineStore('permission', () => {
         name: routePath,
         component: menuItem.compPath ? viewComponentModules[menuItem.compPath] : undefined,
         meta: {
+          id: menuItem.id,
           title: menuItem.name,
           icon: menuItem.icon,
           visible: isVisible
@@ -96,19 +102,55 @@ export const usePermissionStore = defineStore('permission', () => {
   }
 
   /**
+   * 根据菜单ID获取按钮权限 code 数组（带缓存）
+   * @param menuId 菜单ID
+   * @returns 按钮权限 code 数组
+   */
+  async function getButtonPermissionsByMenuId(menuId: number): Promise<string[]> {
+    // 如果缓存中有，直接返回
+    if (buttonPermissionsCache.value[menuId]) {
+      return buttonPermissionsCache.value[menuId]
+    }
+
+    // 从API获取
+    const buttons = await fetchButtonPermissionsByMenuId(menuId)
+    // 只缓存启用的按钮权限的 code 数组
+    const codes = buttons.filter((btn) => btn.status === 1).map((btn) => btn.code)
+    buttonPermissionsCache.value[menuId] = codes
+
+    return codes
+  }
+
+  /**
+   * 清除按钮权限缓存（用于权限更新后刷新）
+   * @param menuId 可选的菜单ID，如果提供则只清除该菜单的缓存，否则清除所有
+   */
+  function clearButtonPermissionsCache(menuId?: number) {
+    if (menuId !== undefined) {
+      delete buttonPermissionsCache.value[menuId]
+    } else {
+      buttonPermissionsCache.value = {}
+    }
+  }
+
+  /**
    * 重置权限状态
    */
   function reset() {
     isInitialized.value = false
     routeTree.value = []
     routeMap.value = {}
+    buttonPermissionsCache.value = {}
   }
 
   return {
     isInitialized,
     routeTree,
     routeMap,
+    buttonPermissionsCache,
     initPermissions,
+    getButtonPermissionsByMenuId,
+    clearButtonPermissionsCache,
     reset
   }
 })
