@@ -2,7 +2,7 @@
 import { computed, ref, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 
-import Header from './header.vue'
+import Header from './header/header.vue'
 import { useAppStore } from '@/store/modules/app-store'
 import Sider, { SIDE_WIDTH, SIDE_COLLAPSED_WIDTH } from './sider/sider.vue'
 

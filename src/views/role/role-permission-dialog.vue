@@ -189,7 +189,9 @@ defineExpose({
 
     <template #footer>
       <permission-button @click="handleCancel">取消</permission-button>
-      <permission-button :disabled="isSystem" type="primary" @click="handleSave">确定</permission-button>
+      <permission-button :disabled="isSystem" type="primary" @click="handleSave"
+        >确定</permission-button
+      >
     </template>
   </el-dialog>
 </template>

@@ -31,6 +31,8 @@ import { useRouter } from 'vue-router'
  * ```
  */
 export const useUserStore = defineStore('user', () => {
+  /** 路由 */
+  const router = useRouter()
   // ==================== 认证状态 ====================
   // 用户ID
   const userId = createStorageRef<number>('userId', -1)
@@ -97,7 +99,6 @@ export const useUserStore = defineStore('user', () => {
    * 清除所有认证信息
    */
   function logout(): void {
-    const router = useRouter()
     token.value = ''
     refreshToken.value = ''
     userId.value = -1

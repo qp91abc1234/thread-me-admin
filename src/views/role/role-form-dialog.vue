@@ -74,6 +74,7 @@ const handleSave = async (formEl: FormInstance | undefined) => {
 // 取消
 const handleCancel = () => {
   dialogVisible.value = false
+  roleFormRef.value?.resetFields()
 }
 
 // 暴露方法给父组件

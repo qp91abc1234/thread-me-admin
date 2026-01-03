@@ -1,12 +1,24 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { ref, computed, nextTick } from 'vue'
-import { Fold, Moon, Sunny, Expand, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import {
+  Fold,
+  Moon,
+  Sunny,
+  Expand,
+  ArrowLeft,
+  ArrowRight,
+  User,
+  SwitchButton
+} from '@element-plus/icons-vue'
 
 import { useAppStore } from '@/store/modules/app-store'
 import { usePermissionStore } from '@/store/modules/permission-store'
+import { useUserStore } from '@/store/modules/user-store'
 
 import { setCssVar } from '@/common/utils/css'
+
+import UserInfoDialog from './user-info-dialog.vue'
 
 import type { ElDropdown, ElScrollbar } from 'element-plus'
 import type { Tab } from '@/store/modules/hooks/use-tabs'
@@ -20,12 +32,14 @@ type RightClickData = {
 const route = useRoute()
 const appStore = useAppStore()
 const permissionStore = usePermissionStore()
+const userStore = useUserStore()
 
 const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>()
 const dropdownRef = ref<InstanceType<typeof ElDropdown>>()
 const scrollLeft = ref(0)
 const scrollOffset = ref(50)
 const rightClickData = ref<RightClickData>({} as RightClickData)
+const userInfoDialogRef = ref<InstanceType<typeof UserInfoDialog>>()
 
 const breadcrumbList = computed(() => {
   const pathSegments = route.path.split('/').slice(1)
@@ -36,6 +50,11 @@ const breadcrumbList = computed(() => {
       return permissionStore.routeMap[currentPath]
     })
     .filter(Boolean)
+})
+
+// 用户头像文字（realName 的第一个字符）
+const avatarText = computed(() => {
+  return userStore.userInfo?.realName?.charAt(0)?.toUpperCase() || 'U'
 })
 
 function handleClickDarkSwitch({ clientX, clientY }: PointerEvent) {
@@ -68,6 +87,14 @@ function handleRightClick(tab: Tab, { clientX, clientY }: MouseEvent) {
     dropdownRef.value?.handleOpen()
   })
 }
+
+function handleLogout() {
+  userStore.logout()
+}
+
+function handleShowUserInfo() {
+  userInfoDialogRef.value?.open()
+}
 </script>
 
 <template>
@@ -92,7 +119,7 @@ function handleRightClick(tab: Tab, { clientX, clientY }: MouseEvent) {
           </el-breadcrumb-item>
         </el-breadcrumb>
       </g-flex>
-      <g-flex align="center">
+      <g-flex align="center" class="header-right">
         <el-switch
           class="dark-switch"
           :model-value="!appStore.themeCfg.darkMode"
@@ -100,6 +127,29 @@ function handleRightClick(tab: Tab, { clientX, clientY }: MouseEvent) {
           :inactive-action-icon="Moon"
           @click="handleClickDarkSwitch"
         />
+        <el-dropdown trigger="hover" placement="bottom-end" class="user-dropdown">
+          <g-flex align="center" class="user-info">
+            <el-avatar class="user-avatar" :size="32">
+              {{ avatarText }}
+            </el-avatar>
+            <g-flex dir="column" class="user-name">
+              <span class="username">{{ userStore.userInfo?.username }}</span>
+              <span class="realname">{{ userStore.userInfo?.realName }}</span>
+            </g-flex>
+          </g-flex>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="handleShowUserInfo">
+                <el-icon class="mr-5px"><User /></el-icon>
+                用户信息
+              </el-dropdown-item>
+              <el-dropdown-item divided @click="handleLogout">
+                <el-icon class="mr-5px"><SwitchButton /></el-icon>
+                退出登录
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </g-flex>
     </g-flex>
     <g-flex class="-my-10px" align="center">
@@ -160,12 +210,50 @@ function handleRightClick(tab: Tab, { clientX, clientY }: MouseEvent) {
       </el-dropdown-menu>
     </template>
   </el-dropdown>
+  <UserInfoDialog ref="userInfoDialogRef" />
 </template>
 
 <style lang="scss" scoped>
 .header {
   padding: 10px;
   border-bottom: 1px solid var(--el-border-color);
+
+  .header-right {
+    gap: 15px;
+
+    .user-dropdown {
+      cursor: pointer;
+    }
+
+    .user-info {
+      gap: 8px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: var(--el-bg-color-page);
+      }
+
+      .user-avatar {
+        flex-shrink: 0;
+      }
+
+      .user-name {
+        font-size: 14px;
+        line-height: 1.4;
+
+        .username {
+          font-weight: 500;
+        }
+
+        .realname {
+          font-size: 12px;
+          color: var(--el-text-color-secondary);
+        }
+      }
+    }
+  }
 }
 </style>
 

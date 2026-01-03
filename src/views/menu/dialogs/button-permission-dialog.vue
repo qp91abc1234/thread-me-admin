@@ -87,6 +87,7 @@ const handleSave = async (formEl: FormInstance | undefined) => {
 // 取消
 const handleCancel = () => {
   dialogVisible.value = false
+  formRef.value?.resetFields()
 }
 
 // 暴露方法给父组件
@@ -119,7 +120,9 @@ defineExpose({
 
     <template #footer>
       <permission-button @click="handleCancel">取消</permission-button>
-      <permission-button type="primary" :loading="loading" @click="handleSave(formRef)">确定</permission-button>
+      <permission-button type="primary" :loading="loading" @click="handleSave(formRef)"
+        >确定</permission-button
+      >
     </template>
   </el-dialog>
 </template>

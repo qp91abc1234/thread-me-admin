@@ -18,7 +18,9 @@ export type CreateUser = Omit<User, 'id' | 'isSystem' | 'createTime' | 'updateTi
 }
 
 // 更新用户
-export type UpdateUser = Partial<Omit<User, 'id' | 'isSystem' | 'createTime' | 'updateTime'>>
+export type UpdateUser = Partial<Omit<User, 'id' | 'isSystem' | 'createTime' | 'updateTime'>> & {
+  password?: string
+}
 
 // 用户列表查询参数
 export interface UserQueryParams {
