@@ -242,7 +242,7 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
             </el-col>
           </el-row>
           <el-form-item>
-            <el-button type="primary" @click="handleSave(menuFormRef)">保存</el-button>
+            <permission-button type="primary" @click="handleSave(menuFormRef)">保存</permission-button>
           </el-form-item>
         </el-form>
       </div>
@@ -265,9 +265,9 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
                 <el-icon><Search /></el-icon>
               </template>
             </el-input>
-            <el-button type="primary" :icon="Plus" size="small" @click="handleAddButtonPermission">
+            <permission-button type="primary" :icon="Plus" size="small" @click="handleAddButtonPermission">
               新增
-            </el-button>
+            </permission-button>
           </div>
         </div>
         <div class="section-content">
@@ -289,22 +289,22 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
             </el-table-column>
             <el-table-column label="操作" width="120" align="center" fixed="right">
               <template #default="{ row }">
-                <el-button
+                <permission-button
                   type="primary"
                   link
                   size="small"
                   @click="handleEditButtonPermission(row)"
                 >
                   编辑
-                </el-button>
-                <el-button
+                </permission-button>
+                <permission-button
                   type="danger"
                   link
                   size="small"
                   @click="handleDeleteButtonPermission(row)"
                 >
                   删除
-                </el-button>
+                </permission-button>
               </template>
             </el-table-column>
           </el-table>

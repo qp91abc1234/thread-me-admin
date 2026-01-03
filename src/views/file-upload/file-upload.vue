@@ -338,9 +338,9 @@ const stats = computed(() => {
       <template #header>
         <div class="card-header">
           <span>文件上传</span>
-          <el-button v-if="fileList.length > 0" type="danger" size="small" @click="handleClear">
+          <permission-button v-if="fileList.length > 0" type="danger" size="small" @click="handleClear">
             清空列表
-          </el-button>
+          </permission-button>
         </div>
       </template>
 
@@ -408,7 +408,7 @@ const stats = computed(() => {
             </div>
           </div>
           <div class="file-actions">
-            <el-button
+            <permission-button
               v-if="isImage(file.type) && file.status === 'success'"
               type="primary"
               link
@@ -416,8 +416,8 @@ const stats = computed(() => {
               @click="previewImageRefs[file.id]?.showPreview()"
             >
               预览
-            </el-button>
-            <el-button
+            </permission-button>
+            <permission-button
               v-if="file.status === 'error'"
               type="primary"
               link
@@ -425,7 +425,7 @@ const stats = computed(() => {
               @click="handleRetry(file)"
             >
               重试
-            </el-button>
+            </permission-button>
           </div>
         </div>
       </div>

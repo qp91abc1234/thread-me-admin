@@ -31,8 +31,8 @@ const goBack = () => {
       <div class="error-title">{{ errorTitle }}</div>
       <div class="error-description">{{ errorDescription }}</div>
       <div class="error-actions">
-        <el-button type="primary" @click="goHome">返回首页</el-button>
-        <el-button @click="goBack">返回上一页</el-button>
+        <permission-button type="primary" @click="goHome">返回首页</permission-button>
+        <permission-button @click="goBack">返回上一页</permission-button>
       </div>
     </div>
   </div>

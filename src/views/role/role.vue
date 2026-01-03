@@ -156,15 +156,15 @@ init()
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+          <permission-button type="primary" :icon="Search" @click="handleSearch">搜索</permission-button>
+          <permission-button :icon="Refresh" @click="handleReset">重置</permission-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <!-- 操作栏 -->
     <el-card class="toolbar-card">
-      <el-button type="primary" :icon="Plus" @click="handleAdd">新增角色</el-button>
+      <permission-button type="primary" :icon="Plus" @click="handleAdd">新增角色</permission-button>
     </el-card>
 
     <!-- 表格 -->
@@ -190,13 +190,13 @@ init()
         </el-table-column>
         <el-table-column label="操作" min-width="160" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</el-button>
-            <el-button type="success" link :icon="Key" @click="handlePermissionConfig(row, 'menu')">
+            <permission-button type="primary" link :icon="Edit" @click="handleEdit(row)">编辑</permission-button>
+            <permission-button type="success" link :icon="Key" @click="handlePermissionConfig(row, 'menu')">
               权限设置
-            </el-button>
-            <el-button type="danger" link :icon="Delete" @click="handleDelete(row)">
+            </permission-button>
+            <permission-button type="danger" link :icon="Delete" @click="handleDelete(row)">
               删除
-            </el-button>
+            </permission-button>
           </template>
         </el-table-column>
       </el-table>

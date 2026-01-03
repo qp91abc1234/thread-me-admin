@@ -132,8 +132,8 @@ defineExpose({
     </el-form>
 
     <template #footer>
-      <el-button @click="handleCancel">取消</el-button>
-      <el-button type="primary" @click="handleSave(menuFormRef)">确定</el-button>
+      <permission-button @click="handleCancel">取消</permission-button>
+      <permission-button type="primary" @click="handleSave(menuFormRef)">确定</permission-button>
     </template>
   </el-dialog>
 </template>

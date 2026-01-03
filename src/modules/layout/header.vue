@@ -103,11 +103,11 @@ function handleRightClick(tab: Tab, { clientX, clientY }: MouseEvent) {
       </g-flex>
     </g-flex>
     <g-flex class="-my-10px" align="center">
-      <el-button text @click="scrollbarRef?.setScrollLeft(scrollLeft - scrollOffset)">
+      <permission-button text @click="scrollbarRef?.setScrollLeft(scrollLeft - scrollOffset)">
         <el-icon>
           <ArrowLeft />
         </el-icon>
-      </el-button>
+      </permission-button>
       <el-scrollbar
         ref="scrollbarRef"
         class="mx-5px w-full py-10px h-auto!"
@@ -130,11 +130,11 @@ function handleRightClick(tab: Tab, { clientX, clientY }: MouseEvent) {
           </el-tag>
         </g-flex>
       </el-scrollbar>
-      <el-button text @click="scrollbarRef?.setScrollLeft(scrollLeft + scrollOffset)">
+      <permission-button text @click="scrollbarRef?.setScrollLeft(scrollLeft + scrollOffset)">
         <el-icon>
           <ArrowRight />
         </el-icon>
-      </el-button>
+      </permission-button>
     </g-flex>
   </g-flex>
   <el-dropdown

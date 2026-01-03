@@ -1,16 +1,17 @@
 <template>
   <!-- reserveSpace 为 true：占据空间，通过 visibility 控制显示 -->
-  <el-button
+  <!-- display: contents 让 span 不占据空间，子元素会显示并继承父元素的样式 -->
+  <span
     v-if="reserveSpace"
-    v-bind="$attrs"
-    :style="{ visibility: hasAccess ? 'visible' : 'hidden' }"
+    :style="{
+      display: 'contents',
+      visibility: hasAccess ? 'visible' : 'hidden'
+    }"
   >
     <slot />
-  </el-button>
+  </span>
   <!-- reserveSpace 为 false：不占据空间，有权限才显示 -->
-  <el-button v-else-if="hasAccess" v-bind="$attrs">
-    <slot />
-  </el-button>
+  <slot v-else-if="hasAccess" />
 </template>
 
 <script setup lang="ts">
@@ -19,7 +20,7 @@ import { useButtonPermission } from './use-button-permission'
 
 interface Props {
   /**
-   * 按钮权限 code
+   * 权限 code
    * 可以是单个 code 或 code 数组
    */
   code?: string | string[]

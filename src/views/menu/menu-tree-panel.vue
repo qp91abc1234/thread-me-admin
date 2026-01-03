@@ -87,12 +87,12 @@ const handleDelete = async (node: MenuItem) => {
       <div class="card-header">
         <span>菜单树</span>
         <div class="header-actions">
-          <el-button type="primary" :icon="Plus" size="small" @click="handleAddDirectory()">
+          <permission-button type="primary" :icon="Plus" size="small" @click="handleAddDirectory()">
             新建目录
-          </el-button>
-          <el-button type="primary" :icon="Plus" size="small" @click="handleAddMenuItem()">
+          </permission-button>
+          <permission-button type="primary" :icon="Plus" size="small" @click="handleAddMenuItem()">
             新建菜单项
-          </el-button>
+          </permission-button>
         </div>
       </div>
     </template>
@@ -114,7 +114,7 @@ const handleDelete = async (node: MenuItem) => {
           <span class="node-actions">
             <!-- 目录节点：显示添加目录和添加菜单项两个按钮 -->
             <template v-if="!data.compPath || data.compPath === ''">
-              <el-button
+              <permission-button
                 type="primary"
                 link
                 size="small"
@@ -122,8 +122,8 @@ const handleDelete = async (node: MenuItem) => {
                 @click.stop="handleAddDirectory(data)"
               >
                 添加目录
-              </el-button>
-              <el-button
+              </permission-button>
+              <permission-button
                 type="primary"
                 link
                 size="small"
@@ -131,11 +131,11 @@ const handleDelete = async (node: MenuItem) => {
                 @click.stop="handleAddMenuItem(data)"
               >
                 添加菜单项
-              </el-button>
+              </permission-button>
             </template>
             <!-- 菜单项节点：只显示添加菜单项按钮 -->
             <template v-else>
-              <el-button
+              <permission-button
                 type="primary"
                 link
                 size="small"
@@ -143,9 +143,9 @@ const handleDelete = async (node: MenuItem) => {
                 @click.stop="handleAddMenuItem(data)"
               >
                 添加菜单项
-              </el-button>
+              </permission-button>
             </template>
-            <el-button
+            <permission-button
               type="danger"
               link
               size="small"
@@ -153,7 +153,7 @@ const handleDelete = async (node: MenuItem) => {
               @click.stop="handleDelete(data)"
             >
               删除
-            </el-button>
+            </permission-button>
           </span>
         </div>
       </template>

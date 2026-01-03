@@ -110,14 +110,14 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
             </el-form-item>
 
             <el-form-item>
-              <el-button
+              <permission-button
                 type="primary"
                 :loading="loading"
                 class="login-button"
                 @click="handleLogin(loginFormRef)"
               >
                 登录
-              </el-button>
+              </permission-button>
             </el-form-item>
           </el-form>
         </el-card>
