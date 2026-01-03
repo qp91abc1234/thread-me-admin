@@ -17,7 +17,7 @@ init()
 <template>
   <div class="menu-page">
     <el-splitter class="menu-splitter">
-      <el-splitter-panel :min="340" :size="340">
+      <el-splitter-panel :min="450" :size="450">
         <MenuTreePanel />
       </el-splitter-panel>
       <el-splitter-panel>

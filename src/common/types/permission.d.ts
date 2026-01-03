@@ -32,16 +32,20 @@ export interface MenuItem {
   sort: number // 排序值
   visible: boolean // 是否显示
   status: number // 0-禁用，1-启用
+  isSystem: boolean // 是否系统菜单
   parentId: number | null // 父菜单ID，根菜单为null
   children: MenuItem[] // 子菜单
   createTime: string
   updateTime: string
 }
 
-export type CreateMenuItem = Omit<MenuItem, 'id' | 'children' | 'createTime' | 'updateTime'>
+export type CreateMenuItem = Omit<
+  MenuItem,
+  'id' | 'children' | 'createTime' | 'updateTime' | 'isSystem'
+>
 
 export type UpdateMenuItem = Partial<
-  Omit<MenuItem, 'id' | 'children' | 'createTime' | 'updateTime'>
+  Omit<MenuItem, 'id' | 'children' | 'createTime' | 'updateTime' | 'isSystem'>
 >
 
 // 菜单树响应

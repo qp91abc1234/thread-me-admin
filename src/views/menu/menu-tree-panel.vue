@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, Plus } from '@element-plus/icons-vue'
+import { Delete, Plus, Lock } from '@element-plus/icons-vue'
 import { updateMenuSort, deleteMenu } from '@/common/api/permission'
 import MenuFormDialog from './dialogs/menu-form-dialog.vue'
 import { useInject } from './menu-context'
@@ -10,8 +10,19 @@ import type { MenuItem } from '@/common/types/permission'
 const { menuTree, loading, setCurrentNode, loadMenuTree } = useInject()
 const menuFormDialogRef = ref<InstanceType<typeof MenuFormDialog>>()
 
+const handleAllowDrag = (dragNode: any) => {
+  const dragNodeData = dragNode.data as MenuItem
+
+  if (dragNodeData.isSystem) {
+    return false
+  }
+
+  return true
+}
+
 const handleAllowDrop = (_dragNode: any, dropNode: any, type: string) => {
   const dropNodeData = dropNode.data as MenuItem
+
   if (dropNodeData.type === 1 && type === 'inner') {
     return false
   }
@@ -104,14 +115,19 @@ const handleDelete = async (node: MenuItem) => {
       default-expand-all
       draggable
       :allow-drop="handleAllowDrop"
-      :allow-drag="() => true"
+      :allow-drag="handleAllowDrag"
       @node-click="(data: MenuItem) => setCurrentNode(data)"
       @node-drop="handleDragEnd"
     >
       <template #default="{ node, data }">
         <div class="tree-node">
-          <span>{{ node.label }}</span>
-          <span class="node-actions">
+          <span class="node-label">
+            <el-icon v-if="data.isSystem" class="system-icon" :size="14">
+              <Lock />
+            </el-icon>
+            <span>{{ node.label }}</span>
+          </span>
+          <span v-if="!data.isSystem" class="node-actions">
             <!-- 目录节点：显示添加目录和添加菜单项两个按钮 -->
             <template v-if="!data.compPath || data.compPath === ''">
               <permission-button
@@ -204,6 +220,17 @@ const handleDelete = async (node: MenuItem) => {
     align-items: center;
     justify-content: space-between;
     padding-right: 8px;
+
+    .node-label {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+
+      .system-icon {
+        flex-shrink: 0;
+        color: var(--el-color-warning);
+      }
+    }
 
     .node-actions {
       display: none;

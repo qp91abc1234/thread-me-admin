@@ -16,6 +16,9 @@ const { currentNode } = useInject()
 // 表单引用
 const menuFormRef = ref<FormInstance>()
 
+// 是否是系统菜单
+const isSystemMenu = ref(false)
+
 // 菜单表单
 const menuForm = reactive({
   id: 0,
@@ -93,7 +96,12 @@ const handleButtonPermissionSizeChange = (size: number) => {
 watch(
   () => currentNode.value,
   async (node) => {
-    if (!node) return
+    if (!node) {
+      isSystemMenu.value = false
+      return
+    }
+    // 记录是否是系统菜单
+    isSystemMenu.value = node.isSystem ?? false
     // 加载表单数据
     Object.assign(menuForm, node)
 
@@ -182,7 +190,7 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
     <div class="edit-container">
       <!-- 上半部分：编辑表单 -->
       <div class="form-section">
-        <el-form ref="menuFormRef" :model="menuForm" label-width="100px">
+        <el-form ref="menuFormRef" :model="menuForm" :disabled="isSystemMenu" label-width="100px">
           <el-row :gutter="20">
             <el-col :span="8">
               <el-form-item
@@ -242,7 +250,9 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
             </el-col>
           </el-row>
           <el-form-item>
-            <permission-button type="primary" @click="handleSave(menuFormRef)">保存</permission-button>
+            <permission-button v-if="!isSystemMenu" type="primary" @click="handleSave(menuFormRef)"
+              >保存</permission-button
+            >
           </el-form-item>
         </el-form>
       </div>
@@ -265,7 +275,13 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
                 <el-icon><Search /></el-icon>
               </template>
             </el-input>
-            <permission-button type="primary" :icon="Plus" size="small" @click="handleAddButtonPermission">
+            <permission-button
+              v-if="!isSystemMenu"
+              type="primary"
+              :icon="Plus"
+              size="small"
+              @click="handleAddButtonPermission"
+            >
               新增
             </permission-button>
           </div>
@@ -290,6 +306,7 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
             <el-table-column label="操作" width="120" align="center" fixed="right">
               <template #default="{ row }">
                 <permission-button
+                  v-if="!isSystemMenu"
                   type="primary"
                   link
                   size="small"
@@ -298,6 +315,7 @@ const handleDeleteButtonPermission = async (row: ButtonPermission) => {
                   编辑
                 </permission-button>
                 <permission-button
+                  v-if="!isSystemMenu"
                   type="danger"
                   link
                   size="small"
