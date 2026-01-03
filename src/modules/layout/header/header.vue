@@ -223,16 +223,36 @@ function handleShowUserInfo() {
 
     .user-dropdown {
       cursor: pointer;
+      outline: none;
+      border: none;
+
+      // stylelint-disable-next-line selector-class-pattern
+      :deep(.el-dropdown__caret-button) {
+        display: none;
+      }
+
+      // stylelint-disable-next-line selector-class-pattern
+      :deep(.el-dropdown__trigger) {
+        outline: none;
+        border: none;
+      }
     }
 
     .user-info {
       gap: 8px;
       padding: 4px 8px;
+      outline: none;
+      border: none;
       border-radius: 4px;
       transition: background-color 0.3s;
 
       &:hover {
         background-color: var(--el-bg-color-page);
+      }
+
+      &:focus {
+        outline: none;
+        border: none;
       }
 
       .user-avatar {
