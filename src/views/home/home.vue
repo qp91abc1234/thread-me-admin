@@ -1,18 +1,7 @@
 <script setup lang="ts">
 import { formatDateTime } from '@/common/utils'
-import {
-  CircleCheck,
-  DataAnalysis,
-  Document,
-  Moon,
-  Setting,
-  Sunny,
-  User,
-  UserFilled,
-  View,
-  Warning
-} from '@element-plus/icons-vue'
-import { ref, computed, markRaw } from 'vue'
+import { CircleCheck, Moon, Sunny } from '@element-plus/icons-vue'
+import { ref, computed } from 'vue'
 
 const currentTime = ref(new Date())
 
@@ -38,22 +27,6 @@ const greeting = computed(() => {
 const formattedTime = computed(() => {
   return formatDateTime(currentTime.value)
 })
-
-// 统计数据
-const statistics = ref([
-  { title: '今日访问', value: 1234, icon: markRaw(View), color: '#409eff' },
-  { title: '今日订单', value: 56, icon: markRaw(Document), color: '#67c23a' },
-  { title: '待处理', value: 8, icon: markRaw(Warning), color: '#e6a23c' },
-  { title: '总用户数', value: 5678, icon: markRaw(User), color: '#f56c6c' }
-])
-
-// 快捷入口
-const shortcuts = ref([
-  { title: '用户管理', icon: markRaw(User), path: '/system/user' },
-  { title: '角色管理', icon: markRaw(UserFilled), path: '/system/role' },
-  { title: '系统设置', icon: markRaw(Setting), path: '/system/setting' },
-  { title: '数据统计', icon: markRaw(DataAnalysis), path: '/data/statistics' }
-])
 </script>
 
 <template>
@@ -77,40 +50,6 @@ const shortcuts = ref([
       </div>
     </el-card>
 
-    <!-- 统计数据 -->
-    <div class="statistics-grid">
-      <el-card v-for="item in statistics" :key="item.title" class="statistic-card" shadow="hover">
-        <div class="statistic-content">
-          <div class="statistic-icon" :style="{ backgroundColor: item.color }">
-            <el-icon :size="32">
-              <component :is="item.icon" />
-            </el-icon>
-          </div>
-          <div class="statistic-info">
-            <div class="statistic-value">{{ item.value }}</div>
-            <div class="statistic-title">{{ item.title }}</div>
-          </div>
-        </div>
-      </el-card>
-    </div>
-
-    <!-- 快捷入口 -->
-    <el-card class="shortcuts-card">
-      <template #header>
-        <div class="card-header">
-          <span>快捷入口</span>
-        </div>
-      </template>
-      <div class="shortcuts-grid">
-        <div v-for="item in shortcuts" :key="item.title" class="shortcut-item">
-          <el-icon :size="40" color="#409eff">
-            <component :is="item.icon" />
-          </el-icon>
-          <div class="shortcut-title">{{ item.title }}</div>
-        </div>
-      </div>
-    </el-card>
-
     <!-- 系统信息 -->
     <div class="info-grid">
       <el-card>
@@ -120,14 +59,36 @@ const shortcuts = ref([
           </div>
         </template>
         <div class="tech-stack">
-          <el-tag type="primary">Vue 3.5+</el-tag>
-          <el-tag type="success">Element Plus 2.9+</el-tag>
-          <el-tag type="warning">Pinia 2.3+</el-tag>
-          <el-tag type="danger">Vue Router 4.5+</el-tag>
-          <el-tag type="info">TypeScript 5.6+</el-tag>
-          <el-tag>Vite 6.0+</el-tag>
-          <el-tag type="primary">UnoCSS</el-tag>
-          <el-tag type="success">Axios</el-tag>
+          <div class="tech-section">
+            <div class="tech-title">前端</div>
+            <div class="tech-tags">
+              <el-tag type="primary">Vue 3.5+</el-tag>
+              <el-tag type="success">Element Plus 2.9+</el-tag>
+              <el-tag type="warning">Pinia 2.3+</el-tag>
+              <el-tag type="danger">Vue Router 4.5+</el-tag>
+              <el-tag type="info">TypeScript 5.6+</el-tag>
+              <el-tag>Vite 6.0+</el-tag>
+              <el-tag type="primary">UnoCSS</el-tag>
+              <el-tag type="success">Axios</el-tag>
+            </div>
+          </div>
+          <div class="tech-section">
+            <div class="tech-title">后端</div>
+            <div class="tech-tags">
+              <el-tag type="primary">NestJS 10.0+</el-tag>
+              <el-tag type="success">Prisma 7.1+</el-tag>
+              <el-tag type="warning">TypeScript 5.1+</el-tag>
+              <el-tag type="danger">MariaDB</el-tag>
+              <el-tag type="info">Redis 4.7+</el-tag>
+              <el-tag>JWT</el-tag>
+              <el-tag type="primary">Passport</el-tag>
+              <el-tag type="success">Swagger</el-tag>
+              <el-tag type="warning">Winston</el-tag>
+              <el-tag type="danger">bcrypt</el-tag>
+              <el-tag type="info">class-validator</el-tag>
+              <el-tag>class-transformer</el-tag>
+            </div>
+          </div>
         </div>
       </el-card>
 
@@ -139,22 +100,36 @@ const shortcuts = ref([
         </template>
         <ul class="feature-list">
           <li>
-            <el-icon color="#67c23a"><CircleCheck /></el-icon> 动态路由和权限管理
+            <el-icon color="#67c23a"><CircleCheck /></el-icon>
+            动态路由和权限管理（菜单权限、按钮权限、API权限）
           </li>
           <li>
-            <el-icon color="#67c23a"><CircleCheck /></el-icon> 响应式布局
+            <el-icon color="#67c23a"><CircleCheck /></el-icon> 响应式布局，支持移动端适配
           </li>
           <li>
-            <el-icon color="#67c23a"><CircleCheck /></el-icon> 主题切换
+            <el-icon color="#67c23a"><CircleCheck /></el-icon> 深色/浅色主题切换，支持动画过渡
           </li>
           <li>
-            <el-icon color="#67c23a"><CircleCheck /></el-icon> 页面标签导航
+            <el-icon color="#67c23a"><CircleCheck /></el-icon> 页面标签导航，支持右键操作
           </li>
           <li>
-            <el-icon color="#67c23a"><CircleCheck /></el-icon> 用户认证
+            <el-icon color="#67c23a"><CircleCheck /></el-icon> JWT 认证，支持 Token 刷新
           </li>
           <li>
-            <el-icon color="#67c23a"><CircleCheck /></el-icon> 代码规范检查
+            <el-icon color="#67c23a"><CircleCheck /></el-icon> RESTful API 设计，Swagger 文档
+          </li>
+          <li>
+            <el-icon color="#67c23a"><CircleCheck /></el-icon> Prisma ORM，类型安全的数据库操作
+          </li>
+          <li>
+            <el-icon color="#67c23a"><CircleCheck /></el-icon> 请求去重，避免并发重复请求
+          </li>
+          <li>
+            <el-icon color="#67c23a"><CircleCheck /></el-icon> 系统菜单保护，防止误操作
+          </li>
+          <li>
+            <el-icon color="#67c23a"><CircleCheck /></el-icon>
+            代码规范检查（ESLint、Prettier、Stylelint）
           </li>
         </ul>
       </el-card>
@@ -205,89 +180,30 @@ const shortcuts = ref([
     }
   }
 
-  .statistics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
-
-    .statistic-card {
-      .statistic-content {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-
-        .statistic-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 64px;
-          height: 64px;
-          color: white;
-          border-radius: 12px;
-        }
-
-        .statistic-info {
-          flex: 1;
-
-          .statistic-value {
-            margin-bottom: 8px;
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--el-text-color-primary);
-          }
-
-          .statistic-title {
-            font-size: 14px;
-            color: var(--el-text-color-secondary);
-          }
-        }
-      }
-    }
-  }
-
-  .shortcuts-card {
-    margin-bottom: 20px;
-
-    .shortcuts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 20px;
-
-      .shortcut-item {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        align-items: center;
-        padding: 20px;
-        cursor: pointer;
-        border: 1px solid var(--el-border-color-lighter);
-        border-radius: 8px;
-        transition: all 0.3s;
-
-        &:hover {
-          border-color: #409eff;
-          box-shadow: 0 4px 12px rgb(64 158 255 / 20%);
-          transform: translateY(-4px);
-        }
-
-        .shortcut-title {
-          font-size: 14px;
-          color: var(--el-text-color-regular);
-        }
-      }
-    }
-  }
-
   .info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 20px;
 
     .tech-stack {
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
+      flex-direction: column;
+      gap: 20px;
+
+      .tech-section {
+        .tech-title {
+          margin-bottom: 12px;
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--el-text-color-primary);
+        }
+
+        .tech-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+      }
     }
 
     .feature-list {
@@ -324,16 +240,6 @@ const shortcuts = ref([
 
       .welcome-image {
         margin-top: 20px;
-      }
-    }
-
-    .statistics-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .shortcuts-card {
-      .shortcuts-grid {
-        grid-template-columns: 1fr;
       }
     }
 
