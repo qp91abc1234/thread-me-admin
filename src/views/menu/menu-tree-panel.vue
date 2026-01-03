@@ -23,6 +23,10 @@ const handleAllowDrag = (dragNode: any) => {
 const handleAllowDrop = (_dragNode: any, dropNode: any, type: string) => {
   const dropNodeData = dropNode.data as MenuItem
 
+  if (dropNodeData.isSystem) {
+    return false
+  }
+
   if (dropNodeData.type === 1 && type === 'inner') {
     return false
   }
