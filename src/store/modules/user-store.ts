@@ -55,8 +55,20 @@ export const useUserStore = defineStore('user', () => {
     userId.value = res.userId
     token.value = res.token
     refreshToken.value = res.refreshToken
+  }
 
-    const user = await getUserDetail(res.userId)
+  /**
+   * 获取用户信息
+   * @throws 获取用户信息失败时抛出错误
+   */
+  async function getUserInfo(): Promise<void> {
+    if (!userId.value) {
+      throw new Error('User ID is not set')
+    }
+    if (userInfo.value) {
+      return
+    }
+    const user = await getUserDetail(userId.value)
     userInfo.value = user
   }
 
@@ -86,6 +98,8 @@ export const useUserStore = defineStore('user', () => {
   function logout(): void {
     token.value = ''
     refreshToken.value = ''
+    userId.value = -1
+    userInfo.value = undefined
   }
 
   return {
@@ -104,6 +118,8 @@ export const useUserStore = defineStore('user', () => {
     // 方法
     /** 登录 */
     login,
+    /** 获取用户信息 */
+    getUserInfo,
     /** 刷新令牌 */
     refresh,
     /** 登出 */

@@ -17,6 +17,7 @@ router.beforeEach(async (to, _from, next) => {
   const userStore = useUserStore()
 
   if (userStore.token) {
+    await userStore.getUserInfo()
     await buildAsyncRoutes(router)
 
     if (to.matched.length === 0) {
